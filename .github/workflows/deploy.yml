@@ -11,13 +11,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload via FTP
+      - name: Upload via FTP (account root)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /
+          state-name: .ftp-deploy-sync-state-root.json
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+
+      - name: Upload via FTP (public_html mirror)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: public_html/
+          state-name: .ftp-deploy-sync-state-public-html.json
           exclude: |
             **/.git*
             **/.git*/**
