@@ -1,0 +1,152 @@
+{
+  "songs": [
+    {
+      "id": "frequencia",
+      "title": "Frequência",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 0,
+      "sections": [
+        { "id": "freq-1", "tipo": "Intro", "tom": "", "cifra": "E", "notas": "Intro de baixo", "order": 0 },
+        { "id": "freq-2", "tipo": "Verso", "tom": "", "cifra": "E", "notas": "", "order": 1 },
+        { "id": "freq-3", "tipo": "Refrão", "tom": "", "cifra": "E - G - A", "notas": "", "order": 2 },
+        { "id": "freq-4", "tipo": "Verso", "tom": "", "cifra": "E", "notas": "Crescente", "order": 3 },
+        { "id": "freq-5", "tipo": "Refrão", "tom": "", "cifra": "E - G - A", "notas": "", "order": 4 }
+      ]
+    },
+    {
+      "id": "historia-invertida",
+      "title": "História Invertida",
+      "artist": "Teima",
+      "tom": "D",
+      "bpm": "",
+      "order": 1,
+      "sections": [
+        { "id": "hi-1", "tipo": "Intro", "tom": "", "cifra": "D", "notas": "", "order": 0 },
+        { "id": "hi-2", "tipo": "Verso", "tom": "", "cifra": "D", "notas": "", "order": 1 },
+        { "id": "hi-3", "tipo": "Refrão", "tom": "", "cifra": "A# - C - D", "notas": "", "order": 2 },
+        { "id": "hi-4", "tipo": "Intro", "tom": "", "cifra": "D", "notas": "", "order": 3 },
+        { "id": "hi-5", "tipo": "Verso", "tom": "", "cifra": "D", "notas": "", "order": 4 }
+      ]
+    },
+    {
+      "id": "palhaco",
+      "title": "Palhaço",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 2,
+      "sections": [
+        { "id": "pal-1", "tipo": "Intro", "tom": "", "cifra": "E", "notas": "Tocado por Vasco", "order": 0 },
+        { "id": "pal-2", "tipo": "Verso", "tom": "", "cifra": "", "notas": "", "order": 1 },
+        { "id": "pal-3", "tipo": "Ponte", "tom": "", "cifra": "A - G - E", "notas": "Break", "order": 2 },
+        { "id": "pal-4", "tipo": "Refrão", "tom": "", "cifra": "E - A - G - A", "notas": "", "order": 3 },
+        { "id": "pal-5", "tipo": "Outro", "tom": "", "cifra": "E - G - F# / E - G - A", "notas": "Solo de saxofone. Fim do solo: 1 corda, nota A.", "order": 4 }
+      ]
+    },
+    {
+      "id": "lixo",
+      "title": "Lixo",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 3,
+      "sections": [
+        { "id": "lixo-1", "tipo": "Intro", "tom": "", "cifra": "E", "notas": "", "order": 0 },
+        { "id": "lixo-2", "tipo": "Verso", "tom": "", "cifra": "E", "notas": "", "order": 1 },
+        { "id": "lixo-3", "tipo": "Ponte", "tom": "", "cifra": "G - F# - F", "notas": "Break", "order": 2 },
+        { "id": "lixo-4", "tipo": "Refrão", "tom": "", "cifra": "A - D - E - C", "notas": "", "order": 3 }
+      ]
+    },
+    {
+      "id": "bula",
+      "title": "Bula",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 4,
+      "sections": [
+        { "id": "bula-1", "tipo": "Intro", "tom": "", "cifra": "Em/A", "notas": "", "order": 0 },
+        { "id": "bula-2", "tipo": "Verso", "tom": "", "cifra": "", "notas": "", "order": 1 },
+        { "id": "bula-3", "tipo": "Refrão", "tom": "", "cifra": "A - D - E - C", "notas": "", "order": 2 }
+      ]
+    },
+    {
+      "id": "nado",
+      "title": "Nado",
+      "artist": "Teima",
+      "tom": "A",
+      "bpm": "",
+      "order": 5,
+      "sections": [
+        { "id": "nado-1", "tipo": "Intro", "tom": "", "cifra": "A", "notas": "", "order": 0 },
+        { "id": "nado-2", "tipo": "Verso", "tom": "", "cifra": "A", "notas": "", "order": 1 },
+        { "id": "nado-3", "tipo": "Ponte", "tom": "", "cifra": "A - F - G", "notas": "Break", "order": 2 },
+        { "id": "nado-4", "tipo": "Instrumental", "tom": "", "cifra": "", "notas": "IVR", "order": 3 },
+        { "id": "nado-5", "tipo": "Outro", "tom": "", "cifra": "", "notas": "", "order": 4 }
+      ]
+    },
+    {
+      "id": "repetidos",
+      "title": "Repetidos",
+      "artist": "Teima",
+      "tom": "",
+      "bpm": "",
+      "order": 6,
+      "sections": []
+    },
+    {
+      "id": "linhas-tortas",
+      "title": "Linhas Tortas",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 7,
+      "sections": [
+        { "id": "lt-1", "tipo": "Intro", "tom": "", "cifra": "E", "notas": "Tocado por Vasco", "order": 0 },
+        { "id": "lt-2", "tipo": "Verso", "tom": "", "cifra": "E - D - A", "notas": "", "order": 1 },
+        { "id": "lt-3", "tipo": "Ponte", "tom": "", "cifra": "D - Db - C", "notas": "Descida", "order": 2 },
+        { "id": "lt-4", "tipo": "Intro", "tom": "", "cifra": "E", "notas": "Tocado por Vasco", "order": 3 },
+        { "id": "lt-5", "tipo": "Verso", "tom": "", "cifra": "E - D - A", "notas": "", "order": 4 }
+      ]
+    },
+    {
+      "id": "mal",
+      "title": "Mal",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 8,
+      "sections": [
+        { "id": "mal-1", "tipo": "Intro", "tom": "", "cifra": "", "notas": "Tocado por Hugo", "order": 0 },
+        { "id": "mal-2", "tipo": "Intro", "tom": "", "cifra": "E - G - A", "notas": "", "order": 1 },
+        { "id": "mal-3", "tipo": "Verso", "tom": "", "cifra": "E - G - A", "notas": "", "order": 2 },
+        { "id": "mal-4", "tipo": "Ponte", "tom": "", "cifra": "IV - IV - IV", "notas": "", "order": 3 },
+        { "id": "mal-5", "tipo": "Outro", "tom": "", "cifra": "", "notas": "Down tempo, espacial", "order": 4 }
+      ]
+    },
+    {
+      "id": "labirinto",
+      "title": "Labirinto",
+      "artist": "Teima",
+      "tom": "",
+      "bpm": "",
+      "order": 9,
+      "sections": [
+        { "id": "lab-1", "tipo": "Intro", "tom": "", "cifra": "A", "notas": "", "order": 0 },
+        { "id": "lab-2", "tipo": "Ponte", "tom": "", "cifra": "D - E - F - G", "notas": "Break", "order": 1 },
+        { "id": "lab-3", "tipo": "Refrão", "tom": "", "cifra": "C - G - G# - A", "notas": "", "order": 2 }
+      ]
+    },
+    {
+      "id": "acasa",
+      "title": "Acasa",
+      "artist": "Teima",
+      "tom": "E",
+      "bpm": "",
+      "order": 10,
+      "sections": []
+    }
+  ]
+}
