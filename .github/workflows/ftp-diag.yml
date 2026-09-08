@@ -1,0 +1,29 @@
+name: FTP diagnostic (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List FTP root and candidate paths
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          echo "=== root listing ==="
+          curl -s --list-only "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo
+          echo "=== root listing (verbose LIST) ==="
+          curl -s "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo
+          echo "=== public_html listing ==="
+          curl -s "ftp://$FTP_HOST/public_html/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo
+          echo "=== public_html/public_html listing (nested-folder theory) ==="
+          curl -s "ftp://$FTP_HOST/public_html/public_html/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo
+          echo "=== print working directory after login ==="
+          curl -s --disable-epsv -Q PWD "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" -v 2>&1 | grep -E "^(25|257|<|>)" || true
