@@ -7,23 +7,18 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: List FTP root and candidate paths
+      - name: Probe true docroot
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          echo "=== root listing ==="
+          echo "=== first 2000 bytes of default.php ==="
+          curl -s "ftp://$FTP_HOST/default.php" --user "$FTP_USERNAME:$FTP_PASSWORD" | head -c 2000 || true
+          echo
+          echo "=== uploading root-marker.txt to account root (sibling of default.php) ==="
+          echo "marker-from-account-root" > /tmp/root-marker.txt
+          curl -s -T /tmp/root-marker.txt "ftp://$FTP_HOST/root-marker.txt" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo "upload exit: $?"
+          echo "=== confirm it landed in account root ==="
           curl -s --list-only "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
-          echo
-          echo "=== root listing (verbose LIST) ==="
-          curl -s "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
-          echo
-          echo "=== public_html listing ==="
-          curl -s "ftp://$FTP_HOST/public_html/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
-          echo
-          echo "=== public_html/public_html listing (nested-folder theory) ==="
-          curl -s "ftp://$FTP_HOST/public_html/public_html/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
-          echo
-          echo "=== print working directory after login ==="
-          curl -s --disable-epsv -Q PWD "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" -v 2>&1 | grep -E "^(25|257|<|>)" || true
