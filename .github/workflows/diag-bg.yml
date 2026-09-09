@@ -1,0 +1,9 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dump live data
+        run: |
+          curl -sS --max-time 20 https://teima.space/ensaios/api.php
