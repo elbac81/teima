@@ -11,13 +11,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload via FTP (public_html/ensaios)
+      - name: Upload via FTP (ensaios)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: public_html/ensaios/
+          server-dir: ensaios/
           state-name: .ftp-deploy-sync-state-ensaios.json
           exclude: |
             **/.git*
