@@ -21,6 +21,20 @@ function currentSong() {
   return state.songs.find((s) => s.id === currentSongId) || null;
 }
 
+function songIdFromHash() {
+  const m = location.hash.match(/^#\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+function setHashForSong(id) {
+  const target = id ? "#/" + encodeURIComponent(id) : " ";
+  if (id) {
+    if (location.hash !== "#/" + encodeURIComponent(id)) history.pushState(null, "", "#/" + encodeURIComponent(id));
+  } else if (location.hash) {
+    history.pushState(null, "", location.pathname + location.search);
+  }
+}
+
 function setSyncStatus(kind, label) {
   const el = document.getElementById("syncStatus");
   if (!el) return;
@@ -105,6 +119,7 @@ function renderSongList() {
   el.querySelectorAll(".song-item").forEach((btn) => {
     btn.addEventListener("click", () => {
       currentSongId = btn.dataset.id;
+      setHashForSong(currentSongId);
       renderSongList();
       renderMain();
     });
@@ -253,6 +268,7 @@ function addNewSong() {
   const song = { id: uid(), title: "Nova música", artist: "", tom: "", bpm: "", order: nextOrder, sections: [] };
   state.songs.push(song);
   currentSongId = song.id;
+  setHashForSong(currentSongId);
   saveState();
   renderSongList();
   renderMain();
@@ -260,8 +276,22 @@ function addNewSong() {
 
 function deleteSong(id) {
   state.songs = state.songs.filter((s) => s.id !== id);
-  if (currentSongId === id) currentSongId = null;
+  if (currentSongId === id) {
+    currentSongId = null;
+    setHashForSong(null);
+  }
   saveState();
+  renderSongList();
+  renderMain();
+}
+
+function applyHash() {
+  const id = songIdFromHash();
+  if (id && state.songs.find((s) => s.id === id)) {
+    currentSongId = id;
+  } else if (!id) {
+    currentSongId = null;
+  }
   renderSongList();
   renderMain();
 }
@@ -270,8 +300,11 @@ async function init() {
   document.getElementById("newSongBtn").addEventListener("click", addNewSong);
   setSyncStatus("ok", "a carregar…");
   await loadState();
+  const initialId = songIdFromHash();
+  if (initialId && state.songs.find((s) => s.id === initialId)) currentSongId = initialId;
   renderSongList();
   renderMain();
+  window.addEventListener("hashchange", applyHash);
   pollTimer = setInterval(pollForUpdates, POLL_MS);
   window.addEventListener("beforeunload", () => {
     if (dirty) {
