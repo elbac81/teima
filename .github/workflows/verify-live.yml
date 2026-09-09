@@ -1,0 +1,23 @@
+name: Verify live CSS/HTML (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare live style.css and index.html to repo
+        run: |
+          echo "=== live wordmark-img rule ==="
+          curl -s https://teima.space/ensaios/assets/css/style.css | grep -A 8 "\.wordmark-img"
+          echo
+          echo "=== live empty-state in index.html ==="
+          curl -s https://teima.space/ensaios/ | grep -A 3 "empty-state"
+          echo
+          echo "=== live style.css Last-Modified ==="
+          curl -sI https://teima.space/ensaios/assets/css/style.css | grep -i "last-modified\|etag\|cache"
+          echo
+          echo "=== live index.html Last-Modified ==="
+          curl -sI https://teima.space/ensaios/ | grep -i "last-modified\|etag\|cache"
