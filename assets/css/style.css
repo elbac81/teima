@@ -112,6 +112,7 @@ body {
 .menu-toggle {
   position: relative;
   flex-shrink: 0;
+  margin-left: auto;
 }
 .menu-toggle summary {
   display: flex;
@@ -210,7 +211,9 @@ body {
 }
 
 .sync-status {
-  margin-left: auto;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rail-border);
   font-family: 'Space Mono', monospace;
   font-size: 10.5px;
   letter-spacing: 0.04em;
@@ -219,7 +222,6 @@ body {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
-  flex-shrink: 0;
 }
 .sync-dot {
   width: 6px;
