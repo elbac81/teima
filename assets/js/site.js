@@ -200,9 +200,7 @@ function renderMain() {
             </div>
             <div class="section-fields">
               <label class="field-label">Cifra</label>
-              <textarea class="cifra" data-field="cifra" rows="4" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
-              <label class="field-label">Letra</label>
-              <textarea class="letra" data-field="letra" rows="3" placeholder="Letra desta secção…">${escapeHtml(sec.letra || "")}</textarea>
+              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
               <label class="field-label">Notas</label>
               <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
             </div>
@@ -258,10 +256,6 @@ function renderMain() {
       sec.cifra = e.target.value;
       scheduleSave();
     });
-    card.querySelector('[data-field="letra"]').addEventListener("input", (e) => {
-      sec.letra = e.target.value;
-      scheduleSave();
-    });
     card.querySelector('[data-field="notas"]').addEventListener("input", (e) => {
       sec.notas = e.target.value;
       scheduleSave();
@@ -293,7 +287,7 @@ function addSection(song) {
   const orders = (song.sections || []).map((s) => s.order || 0);
   const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
   song.sections = song.sections || [];
-  song.sections.push({ id: uid(), tipo: "Verso", tom: "", cifra: "", letra: "", notas: "", order: nextOrder });
+  song.sections.push({ id: uid(), tipo: "Verso", tom: "", cifra: "", notas: "", order: nextOrder });
   saveState();
   renderMain();
 }

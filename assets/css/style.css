@@ -529,28 +529,12 @@ textarea.cifra {
   padding: 10px 12px;
   color: var(--text);
   resize: vertical;
-  min-height: 96px;
+  min-height: 220px;
   white-space: pre;
   overflow-x: auto;
   width: 100%;
 }
 textarea.cifra:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-textarea.letra {
-  font-family: 'Bricolage Grotesque', sans-serif;
-  font-size: 14.5px;
-  line-height: 1.6;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent-2);
-  border-radius: 7px;
-  padding: 10px 12px;
-  color: var(--text);
-  resize: vertical;
-  min-height: 64px;
-  width: 100%;
-}
-textarea.letra:focus { outline: 2px solid var(--accent-2); outline-offset: 1px; }
 
 textarea.notas {
   font-family: 'Work Sans', sans-serif;
@@ -566,7 +550,7 @@ textarea.notas {
   width: 100%;
 }
 textarea.notas:focus { outline: none; border-color: var(--accent); color: var(--text); }
-textarea.notas::placeholder, textarea.cifra::placeholder, textarea.letra::placeholder { color: var(--text-dim); opacity: 0.55; }
+textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim); opacity: 0.55; }
 
 .add-section-btn {
   margin-left: 36px;
@@ -628,6 +612,5 @@ textarea.notas::placeholder, textarea.cifra::placeholder, textarea.letra::placeh
     color: #000;
   }
   .print-text.cifra { font-family: 'Space Mono', monospace; font-size: 13px; }
-  .print-text.letra { font-family: 'Bricolage Grotesque', sans-serif; font-size: 13px; }
   .print-text.notas { font-family: 'Work Sans', sans-serif; font-size: 12px; color: #333; }
 }
