@@ -348,8 +348,15 @@ input.title-field:focus { outline: none; }
   position: relative;
   display: flex;
   gap: 16px;
-  padding: 4px 0 26px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 14px 16px 20px;
+  margin-bottom: 16px;
 }
+.section-card:last-child { margin-bottom: 0; }
 .spine-col {
   display: flex;
   flex-direction: column;
@@ -362,7 +369,7 @@ input.title-field:focus { outline: none; }
   height: 11px;
   border-radius: 50%;
   background: var(--accent);
-  border: 2px solid var(--bg);
+  border: 2px solid var(--surface);
   box-shadow: 0 0 0 1px var(--border);
   margin-top: 6px;
   flex-shrink: 0;
@@ -382,18 +389,12 @@ input.title-field:focus { outline: none; }
     align-items: start;
     gap: 20px;
   }
-  .section-card { padding: 4px 0; }
+  .section-card { margin-bottom: 0; }
   .spine-line { display: none; }
 }
 
 .section-body {
   flex: 1;
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px 16px;
-  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -548,7 +549,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   }
   input.title-field { font-size: 26px; }
   .section-card { break-inside: avoid; page-break-inside: avoid; }
-  .section-body { box-shadow: none; border-color: #ccc; }
+  .section-card { box-shadow: none; border-color: #ccc; }
   .spine-dot, .spine-line { background: #999; border-color: #fff; }
   textarea.print-hidden { display: none !important; }
   .print-text {
