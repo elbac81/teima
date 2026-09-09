@@ -147,6 +147,23 @@ body {
   z-index: 30;
 }
 .menu-toggle .menu-panel .new-song-btn { width: 100%; }
+.menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+  background: none;
+  border: 1px solid var(--rail-border);
+  border-radius: 8px;
+  color: var(--rail-text);
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  text-align: center;
+  white-space: nowrap;
+}
+.menu-link:hover { border-color: var(--rail-accent); color: var(--rail-accent); }
 
 .song-grid {
   display: grid;
@@ -209,6 +226,88 @@ body {
   color: var(--accent-2);
   flex-shrink: 0;
 }
+
+.repertorios-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.repertorios-head h2 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 24px;
+  margin: 0;
+  color: var(--page-text);
+}
+.repertorio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.repertorio-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 15px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+.repertorio-card:hover { border-color: var(--accent); }
+.repertorio-card:active { transform: scale(0.98); }
+.repertorio-card .t {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.repertorio-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+.repertorio-card .rep-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.repertorio-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  max-width: 320px;
+}
+.repertorio-picker select {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: var(--text);
+  cursor: pointer;
+}
+.rep-item-title {
+  flex: 1;
+  font-family: 'Work Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.field input[type="date"] { width: 130px; }
 
 .sync-status {
   margin-top: 4px;

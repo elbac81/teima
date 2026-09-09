@@ -8,8 +8,10 @@ const API = "/ensaios/api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
 
-let state = { songs: [] };
+let state = { songs: [], repertorios: [] };
 let currentSongId = null;
+let currentRepertorioId = null;
+let view = "home";
 let saveTimer = null;
 let pollTimer = null;
 let dirty = false;
@@ -26,10 +28,20 @@ function currentSong() {
   return state.songs.find((s) => s.id === currentSongId) || null;
 }
 
+function currentRepertorio() {
+  return state.repertorios.find((r) => r.id === currentRepertorioId) || null;
+}
+
 const SONG_PATH_PREFIX = "/ensaios/musica/";
+const REPERTORIO_PATH_PREFIX = "/ensaios/repertorio/";
+const REPERTORIOS_LIST_PATH = "/ensaios/repertorios";
 
 function songUrl(id) {
   return SONG_PATH_PREFIX + encodeURIComponent(id);
+}
+
+function repertorioUrl(id) {
+  return REPERTORIO_PATH_PREFIX + encodeURIComponent(id);
 }
 
 function songIdFromPath() {
@@ -38,9 +50,34 @@ function songIdFromPath() {
   return id ? decodeURIComponent(id) : null;
 }
 
+function repertorioIdFromPath() {
+  if (!location.pathname.startsWith(REPERTORIO_PATH_PREFIX)) return null;
+  const id = location.pathname.slice(REPERTORIO_PATH_PREFIX.length).replace(/\/$/, "");
+  return id ? decodeURIComponent(id) : null;
+}
+
+function isRepertoriosListPath() {
+  return location.pathname.replace(/\/$/, "") === REPERTORIOS_LIST_PATH;
+}
+
 function setPathForSong(id) {
   const target = id ? songUrl(id) : "/ensaios/";
   if (location.pathname !== target) history.pushState(null, "", target);
+}
+
+function setPathForRepertorio(id) {
+  const target = id ? repertorioUrl(id) : REPERTORIOS_LIST_PATH;
+  if (location.pathname !== target) history.pushState(null, "", target);
+}
+
+function setPathForRepertoriosList() {
+  if (location.pathname !== REPERTORIOS_LIST_PATH) history.pushState(null, "", REPERTORIOS_LIST_PATH);
+}
+
+function formatDate(iso) {
+  if (!iso) return "";
+  const [y, m, d] = iso.split("-");
+  return d && m && y ? `${d}/${m}/${y}` : iso;
 }
 
 function setSyncStatus(kind, label) {
@@ -56,6 +93,7 @@ async function loadState({ silent } = {}) {
     if (!res.ok) throw new Error("http " + res.status);
     const data = await res.json();
     state = data && Array.isArray(data.songs) ? data : { songs: [] };
+    if (!Array.isArray(state.repertorios)) state.repertorios = [];
     setSyncStatus("ok", "sincronizado");
     return true;
   } catch (e) {
@@ -95,9 +133,14 @@ function anyFieldFocused() {
 async function pollForUpdates() {
   if (dirty || anyFieldFocused()) return;
   const prevSongId = currentSongId;
+  const prevRepId = currentRepertorioId;
   await loadState({ silent: true });
   if (prevSongId && !state.songs.find((s) => s.id === prevSongId)) {
     currentSongId = null;
+  }
+  if (prevRepId && !state.repertorios.find((r) => r.id === prevRepId)) {
+    currentRepertorioId = null;
+    if (view === "repertorio") view = "repertorios";
   }
   renderMain();
 }
@@ -129,8 +172,201 @@ function renderHomeGrid() {
     </div>`;
 }
 
+function renderRepertoriosList(main) {
+  const reps = [...state.repertorios].sort((a, b) => (b.data || "").localeCompare(a.data || "") || (a.order || 0) - (b.order || 0));
+  main.innerHTML = `
+    <a class="back-link" href="/ensaios/" id="backLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Todas as músicas
+    </a>
+    <div class="repertorios-head">
+      <h2>Repertórios</h2>
+      <button class="new-song-btn" id="newRepertorioBtn">+ Novo repertório</button>
+    </div>
+    ${
+      reps.length === 0
+        ? '<div class="no-sections">Ainda sem repertórios. Cria o primeiro.</div>'
+        : `<div class="repertorio-grid">
+          ${reps
+            .map(
+              (r) => `
+          <a class="repertorio-card" data-id="${r.id}" href="${repertorioUrl(r.id)}">
+            <span class="t">${escapeHtml(r.nome || "Sem nome")}</span>
+            <span class="meta">
+              ${r.data ? `<span>${formatDate(r.data)}</span>` : ""}
+              ${r.local ? `<span>${escapeHtml(r.local)}</span>` : ""}
+            </span>
+            <span class="rep-count">${(r.musicas || []).length} música${(r.musicas || []).length === 1 ? "" : "s"}</span>
+          </a>`
+            )
+            .join("")}
+        </div>`
+    }
+  `;
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentRepertorioId = null;
+    view = "home";
+    setPathForSong(null);
+    renderMain();
+  });
+  document.getElementById("newRepertorioBtn").addEventListener("click", addNewRepertorio);
+  main.querySelectorAll(".repertorio-card").forEach((card) => {
+    card.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      currentRepertorioId = card.dataset.id;
+      view = "repertorio";
+      setPathForRepertorio(currentRepertorioId);
+      renderMain();
+    });
+  });
+}
+
+function renderRepertorioDetail(main, rep) {
+  rep.musicas = rep.musicas || [];
+  const musicas = rep.musicas;
+  const availableSongs = state.songs.filter((s) => !musicas.includes(s.id));
+  main.innerHTML = `
+    <a class="back-link" href="${REPERTORIOS_LIST_PATH}" id="backToRepertorios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Repertórios
+    </a>
+    <div class="song-header">
+      <div class="title-row">
+        <input class="title-field" id="repNomeInput" placeholder="Nome do repertório" value="${escapeHtml(rep.nome || "")}" />
+        <button class="mini-btn del" id="repDeleteBtn" title="Eliminar repertório">✕</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Data</label><input type="date" id="repDataInput" value="${escapeHtml(rep.data || "")}" /></div>
+        <div class="field"><label>Local</label><input id="repLocalInput" placeholder="ex. Sala Tejo" value="${escapeHtml(rep.local || "")}" /></div>
+      </div>
+    </div>
+    <div class="repertorio-picker">
+      <label class="field-label">Adicionar música</label>
+      <select id="repAddSongSelect">
+        <option value="">Escolher música…</option>
+        ${availableSongs.map((s) => `<option value="${s.id}">${escapeHtml(s.title || "Sem título")}</option>`).join("")}
+      </select>
+    </div>
+    <div class="structure" id="repList">
+      ${
+        musicas.length === 0
+          ? '<div class="no-sections">Ainda sem músicas neste repertório.</div>'
+          : musicas
+              .map((songId, i) => {
+                const song = state.songs.find((s) => s.id === songId);
+                return `
+        <div class="section-card rep-item" data-id="${songId}">
+          <div class="spine-col">
+            <div class="spine-dot"></div>
+            <div class="spine-line"></div>
+          </div>
+          <div class="section-body">
+            <div class="section-top">
+              <span class="rep-item-title">${i + 1}. ${escapeHtml(song ? song.title || "Sem título" : "(música removida)")}</span>
+              <div class="section-actions">
+                <button class="mini-btn up" title="Mover para cima">↑</button>
+                <button class="mini-btn down" title="Mover para baixo">↓</button>
+                <button class="mini-btn del" title="Remover do repertório">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+              })
+              .join("")
+      }
+    </div>
+  `;
+
+  document.getElementById("backToRepertorios").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentRepertorioId = null;
+    view = "repertorios";
+    setPathForRepertoriosList();
+    renderMain();
+  });
+  document.getElementById("repNomeInput").addEventListener("input", (e) => {
+    rep.nome = e.target.value;
+    scheduleSave();
+  });
+  document.getElementById("repDataInput").addEventListener("input", (e) => {
+    rep.data = e.target.value;
+    scheduleSave();
+  });
+  document.getElementById("repLocalInput").addEventListener("input", (e) => {
+    rep.local = e.target.value;
+    scheduleSave();
+  });
+  document.getElementById("repDeleteBtn").addEventListener("click", () => {
+    if (!confirm("Eliminar este repertório?")) return;
+    state.repertorios = state.repertorios.filter((r) => r.id !== rep.id);
+    currentRepertorioId = null;
+    view = "repertorios";
+    setPathForRepertoriosList();
+    saveState();
+    renderMain();
+  });
+  document.getElementById("repAddSongSelect").addEventListener("change", (e) => {
+    const songId = e.target.value;
+    if (!songId) return;
+    if (!musicas.includes(songId)) musicas.push(songId);
+    saveState();
+    renderMain();
+  });
+  main.querySelectorAll("#repList .rep-item").forEach((card, i) => {
+    const songId = card.dataset.id;
+    card.querySelector(".up").addEventListener("click", () => moveRepertorioSong(rep, i, -1));
+    card.querySelector(".down").addEventListener("click", () => moveRepertorioSong(rep, i, 1));
+    card.querySelector(".del").addEventListener("click", () => {
+      rep.musicas = rep.musicas.filter((id) => id !== songId);
+      saveState();
+      renderMain();
+    });
+  });
+}
+
+function moveRepertorioSong(rep, index, dir) {
+  const other = index + dir;
+  const list = rep.musicas;
+  if (other < 0 || other >= list.length) return;
+  const tmp = list[index];
+  list[index] = list[other];
+  list[other] = tmp;
+  saveState();
+  renderMain();
+}
+
+function addNewRepertorio() {
+  const orders = state.repertorios.map((r) => r.order || 0);
+  const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
+  const rep = { id: uid(), nome: "Novo repertório", data: "", local: "", order: nextOrder, musicas: [] };
+  state.repertorios.push(rep);
+  currentRepertorioId = rep.id;
+  view = "repertorio";
+  setPathForRepertorio(rep.id);
+  saveState();
+  renderMain();
+}
+
 function renderMain() {
   const main = document.getElementById("main");
+  if (view === "repertorios") {
+    renderRepertoriosList(main);
+    return;
+  }
+  if (view === "repertorio") {
+    const rep = currentRepertorio();
+    if (rep) {
+      renderRepertorioDetail(main, rep);
+      return;
+    }
+    view = "repertorios";
+    renderRepertoriosList(main);
+    return;
+  }
   const song = currentSong();
   if (!song) {
     main.innerHTML = renderHomeGrid();
@@ -139,6 +375,8 @@ function renderMain() {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
         currentSongId = card.dataset.id;
+        currentRepertorioId = null;
+        view = "song";
         setPathForSong(currentSongId);
         renderMain();
       });
@@ -232,6 +470,7 @@ function renderMain() {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     currentSongId = null;
+    view = "home";
     setPathForSong(null);
     renderMain();
   });
@@ -295,17 +534,32 @@ function addNewSong() {
   const song = { id: uid(), title: "Nova música", artist: "", tom: "", bpm: "", estado: "composicao", order: nextOrder, sections: [] };
   state.songs.push(song);
   currentSongId = song.id;
+  currentRepertorioId = null;
+  view = "song";
   setPathForSong(currentSongId);
   saveState();
   renderMain();
 }
 
 function applyPath() {
-  const id = songIdFromPath();
-  if (id && state.songs.find((s) => s.id === id)) {
-    currentSongId = id;
-  } else if (!id) {
+  const songId = songIdFromPath();
+  const repId = repertorioIdFromPath();
+  if (songId && state.songs.find((s) => s.id === songId)) {
+    currentSongId = songId;
+    currentRepertorioId = null;
+    view = "song";
+  } else if (repId && state.repertorios.find((r) => r.id === repId)) {
+    currentRepertorioId = repId;
     currentSongId = null;
+    view = "repertorio";
+  } else if (isRepertoriosListPath() || repId) {
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "repertorios";
+  } else {
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "home";
   }
   renderMain();
 }
@@ -335,14 +589,25 @@ async function init() {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     currentSongId = null;
+    currentRepertorioId = null;
+    view = "home";
     setPathForSong(null);
+    renderMain();
+  });
+  document.getElementById("repertoriosLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const menu = document.getElementById("menuToggle");
+    if (menu) menu.open = false;
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "repertorios";
+    setPathForRepertoriosList();
     renderMain();
   });
   setSyncStatus("ok", "a carregar…");
   await loadState();
-  const initialId = songIdFromPath();
-  if (initialId && state.songs.find((s) => s.id === initialId)) currentSongId = initialId;
-  renderMain();
+  applyPath();
   window.addEventListener("popstate", applyPath);
   window.addEventListener("beforeprint", showPrintText);
   window.addEventListener("afterprint", hidePrintText);

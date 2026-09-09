@@ -35,6 +35,11 @@ if ($method === 'POST') {
         echo json_encode(['error' => 'invalid payload']);
         exit;
     }
+    if (array_key_exists('repertorios', $decoded) && !is_array($decoded['repertorios'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'invalid payload']);
+        exit;
+    }
 
     $fp = fopen($file, 'c+');
     if (!$fp) {
