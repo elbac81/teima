@@ -95,6 +95,7 @@ body {
 .brand {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
   margin-bottom: 4px;
 }
@@ -108,10 +109,10 @@ body {
 .wordmark-img {
   display: block;
   width: 100%;
-  max-width: 240px;
+  max-width: 140px;
   height: auto;
   mix-blend-mode: screen;
-  margin: 0 0 -6px -2px;
+  margin: 0 auto;
 }
 
 .new-song-btn {

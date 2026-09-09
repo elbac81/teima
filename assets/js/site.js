@@ -141,12 +141,7 @@ function renderMain() {
   const main = document.getElementById("main");
   const song = currentSong();
   if (!song) {
-    main.innerHTML = `
-      <div class="empty-state">
-        <span class="eyebrow">Notas de ensaio</span>
-        <h2>Escolhe uma música ou cria uma nova.</h2>
-        <p>Estrutura cada música por secções — intro, verso, refrão, solo, ponte, outro — com tom, acordes sobre a letra e notas de ensaio para cada uma.</p>
-      </div>`;
+    main.innerHTML = `<div class="empty-state"></div>`;
     return;
   }
 
