@@ -4,8 +4,11 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: sample live data with timeout
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: POST musicas.json to live api.php
         run: |
-          curl -sS --max-time 20 -D - -o /tmp/out.json https://teima.space/ensaios/api.php || echo "CURL EXIT CODE: $?"
-          echo "--- first 3000 bytes of body ---"
-          head -c 3000 /tmp/out.json || true
+          curl -sS --max-time 20 -X POST -H "Content-Type: application/json" --data-binary @dados/musicas.json https://teima.space/ensaios/api.php
+          echo
+          echo "--- verify GET back ---"
+          curl -sS --max-time 20 https://teima.space/ensaios/api.php | head -c 800
