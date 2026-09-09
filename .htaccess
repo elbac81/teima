@@ -1,3 +1,12 @@
+<Files ".htpasswd">
+  Require all denied
+</Files>
+
+AuthType Basic
+AuthName "Teima — notas de ensaio"
+AuthUserFile /home/u759784315/domains/teima.space/public_html/ensaios/.htpasswd
+Require valid-user
+
 RewriteEngine On
 RewriteBase /ensaios/
 RewriteCond %{REQUEST_FILENAME} !-f
