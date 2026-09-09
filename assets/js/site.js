@@ -151,7 +151,6 @@ function renderMain() {
     <div class="song-header">
       <div class="title-row">
         <input class="title-field" id="titleInput" placeholder="Título da música" value="${escapeHtml(song.title || "")}" />
-        <div class="header-actions"><button class="icon-btn" id="delSongBtn">eliminar música</button></div>
       </div>
       <input class="artist-field" id="artistInput" placeholder="Artista / autor" value="${escapeHtml(song.artist || "")}" />
       <div class="field-row">
@@ -219,7 +218,6 @@ function renderMain() {
     song.bpm = e.target.value;
     scheduleSave();
   });
-  document.getElementById("delSongBtn").addEventListener("click", () => deleteSong(song.id));
   document.getElementById("addSectionBtn").addEventListener("click", () => addSection(song));
 
   document.querySelectorAll("#structure .section-card").forEach((card, i, all) => {
@@ -286,17 +284,6 @@ function addNewSong() {
   state.songs.push(song);
   currentSongId = song.id;
   setPathForSong(currentSongId);
-  saveState();
-  renderSongList();
-  renderMain();
-}
-
-function deleteSong(id) {
-  state.songs = state.songs.filter((s) => s.id !== id);
-  if (currentSongId === id) {
-    currentSongId = null;
-    setPathForSong(null);
-  }
   saveState();
   renderSongList();
   renderMain();

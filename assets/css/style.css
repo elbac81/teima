@@ -311,19 +311,6 @@ input.artist-field:focus { outline: none; color: var(--text); }
 }
 .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.header-actions { margin-left: auto; align-self: flex-end; }
-.icon-btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  border-radius: 6px;
-  padding: 6px 11px;
-  font-family: 'Work Sans', sans-serif;
-  font-size: 12.5px;
-  cursor: pointer;
-}
-.icon-btn:hover { border-color: var(--danger-c); color: var(--danger-c); }
-
 /* ---- Structure spine ---- */
 .structure {
   position: relative;
