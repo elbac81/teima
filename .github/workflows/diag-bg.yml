@@ -1,0 +1,14 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify social links
+        run: |
+          echo "--- social-row on homepage ---"
+          curl -s --max-time 20 "https://teima.space/?x=1" | grep -c 'social-row'
+          echo "--- facebook url on homepage ---"
+          curl -s --max-time 20 "https://teima.space/?x=2" | grep -o 'facebook.com/[a-zA-Z0-9_/]*'
+          echo "--- social-list on socials page ---"
+          curl -s --max-time 20 "https://teima.space/socials/?x=3" | grep -c 'social-list'
