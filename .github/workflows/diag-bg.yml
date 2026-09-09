@@ -1,0 +1,16 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify deep URL reload
+        run: |
+          echo "--- status of deep song URL ---"
+          curl -sD - -o /dev/null --max-time 20 https://teima.space/ensaios/musica/frequencia
+          echo "--- css link in HTML ---"
+          curl -s --max-time 20 https://teima.space/ensaios/musica/frequencia | grep -o 'href="/ensaios/assets/css/style.css[^"]*"'
+          echo "--- js script in HTML ---"
+          curl -s --max-time 20 https://teima.space/ensaios/musica/frequencia | grep -o 'src="/ensaios/assets/js/site.js[^"]*"'
+          echo "--- absolute css path resolves ---"
+          curl -sD - -o /dev/null --max-time 20 https://teima.space/ensaios/assets/css/style.css
