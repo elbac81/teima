@@ -1,9 +1,0 @@
-name: Diag bg check
-on: workflow_dispatch
-jobs:
-  diag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: verify grid css
-        run: |
-          curl -s --max-time 20 -u teima:fareja "https://teima.space/ensaios/assets/css/style.css?v=e063dc880b181fefda6eb00caf9a9d966c2a857e" | grep -A5 '@media (min-width: 1000px)'
