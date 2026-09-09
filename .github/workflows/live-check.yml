@@ -7,20 +7,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Compare live files to repo
+      - name: List current public_html contents
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
-          echo "=== live site.js size ==="
-          curl -s https://teima.space/assets/js/site.js -o /tmp/live-site.js
-          wc -c /tmp/live-site.js assets/js/site.js
-          echo "=== diff (live vs repo) ==="
-          diff /tmp/live-site.js assets/js/site.js && echo "IDENTICAL" || echo "DIFFERENT"
+          echo "=== public_html listing ==="
+          curl -s "ftp://$FTP_HOST/public_html/" --user "$FTP_USERNAME:$FTP_PASSWORD"
           echo
-          echo "=== live api.php response ==="
-          curl -s https://teima.space/api.php | head -c 500
-          echo
-          echo "=== live index.html (first 2000 bytes) ==="
-          curl -s https://teima.space/ | head -c 2000
-          echo
-          echo "=== console-visible errors: check content-type of site.js ==="
-          curl -sI https://teima.space/assets/js/site.js
+          echo "=== account root listing ==="
+          curl -s "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD"
