@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teima</title>
+  <link rel="icon" href="data:,">
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .logo {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      display: block;
+    }
+    a.ensaios-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #e8c34a;
+      text-decoration: none;
+      border: 1px solid rgba(232, 195, 74, 0.4);
+      border-radius: 999px;
+      padding: 10px 22px;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    a.ensaios-link:hover {
+      border-color: #e8c34a;
+      background: rgba(232, 195, 74, 0.08);
+    }
+    a.ensaios-link svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <img class="logo" src="teima_logo.jpg" alt="TEIMA">
+  <a class="ensaios-link" href="/ensaios/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+      <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+    </svg>
+    Notas de ensaio
+  </a>
+</body>
+</html>

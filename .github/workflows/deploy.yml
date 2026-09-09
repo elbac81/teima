@@ -23,3 +23,13 @@ jobs:
             **/.git*
             **/.git*/**
             **/.github/**
+
+      - name: Upload via FTP (domain root landing page)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: root-page/
+          server-dir: ./
+          state-name: .ftp-deploy-sync-state-root.json
