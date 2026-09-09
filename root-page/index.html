@@ -14,12 +14,11 @@
     }
     body {
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 40px;
       min-height: 100vh;
       padding: 24px;
+      position: relative;
     }
     .logo {
       width: 100%;
@@ -28,18 +27,17 @@
       display: block;
     }
     a.ensaios-link {
-      display: inline-flex;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
       align-items: center;
-      gap: 10px;
-      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-      font-size: 15px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
       color: #e8c34a;
-      text-decoration: none;
       border: 1px solid rgba(232, 195, 74, 0.4);
       border-radius: 999px;
-      padding: 10px 22px;
       transition: border-color 0.15s ease, background 0.15s ease;
     }
     a.ensaios-link:hover {
@@ -47,20 +45,18 @@
       background: rgba(232, 195, 74, 0.08);
     }
     a.ensaios-link svg {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
     }
   </style>
 </head>
 <body>
   <img class="logo" src="teima_logo.jpg" alt="TEIMA">
-  <a class="ensaios-link" href="/ensaios/">
+  <a class="ensaios-link" href="/ensaios/" aria-label="Notas de ensaio">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="4" y="11" width="16" height="10" rx="2"></rect>
       <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
     </svg>
-    Notas de ensaio
   </a>
 </body>
 </html>
