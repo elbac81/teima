@@ -1,0 +1,21 @@
+name: Diag screenshot
+on: workflow_dispatch
+jobs:
+  shot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install playwright@1.47.0
+      - run: npx playwright install --with-deps chromium
+      - run: node shot.js
+      - name: dump base64
+        run: |
+          echo REP_START
+          base64 -w0 rep.png
+          echo REP_END
+          echo ROOT_START
+          base64 -w0 root.png
+          echo ROOT_END
