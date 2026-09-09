@@ -13,9 +13,15 @@ jobs:
       - run: node shot.js
       - name: dump base64
         run: |
-          echo REP_START
-          base64 -w0 rep.png
-          echo REP_END
+          echo REPLIST_START
+          base64 -w0 rep-list.png
+          echo REPLIST_END
+          echo REPDETAIL_START
+          base64 -w0 rep-detail.png
+          echo REPDETAIL_END
+          echo EVENTOS_START
+          base64 -w0 eventos.png
+          echo EVENTOS_END
           echo ROOT_START
           base64 -w0 root.png
           echo ROOT_END
