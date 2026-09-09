@@ -1,0 +1,12 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify toggle removed
+        run: |
+          echo "--- leftover toggle refs in deployed site.js ---"
+          curl -s --max-time 20 https://teima.space/ensaios/assets/js/site.js | grep -c 'expandedSections\|mini-btn toggle' || true
+          echo "--- section-fields display rule in deployed style.css ---"
+          curl -s --max-time 20 https://teima.space/ensaios/assets/css/style.css | grep -A2 '\.section-fields {'
