@@ -99,7 +99,8 @@ a { color: inherit; }
   .nav-toggle { display: block; }
 }
 
-a.ensaios-link {
+a.ensaios-link,
+a.icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,11 +113,24 @@ a.ensaios-link {
   text-decoration: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-a.ensaios-link:hover {
+a.ensaios-link:hover,
+a.icon-btn:hover {
   border-color: var(--gold);
   background: rgba(232, 195, 74, 0.08);
 }
-a.ensaios-link svg { width: 16px; height: 16px; }
+a.ensaios-link svg,
+a.icon-btn svg { width: 16px; height: 16px; }
+
+.social-row {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 50;
+}
 
 /* ---- Generic inner page layout (socials / música / vídeos / sobre) ---- */
 .page {
@@ -159,4 +173,35 @@ a.ensaios-link svg { width: 16px; height: 16px; }
   color: var(--text-dim);
   line-height: 1.6;
   margin: 0;
+}
+
+.social-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+.social-list a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: var(--panel);
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.social-list a:hover {
+  border-color: var(--gold);
+  background: rgba(232, 195, 74, 0.08);
+}
+.social-list a svg {
+  width: 20px;
+  height: 20px;
+  color: var(--gold);
+  flex-shrink: 0;
 }
