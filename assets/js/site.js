@@ -326,7 +326,11 @@ function hidePrintText() {
 }
 
 async function init() {
-  document.getElementById("newSongBtn").addEventListener("click", addNewSong);
+  document.getElementById("newSongBtn").addEventListener("click", () => {
+    const menu = document.getElementById("menuToggle");
+    if (menu) menu.open = false;
+    addNewSong();
+  });
   document.getElementById("homeLink").addEventListener("click", (e) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
