@@ -1,4 +1,4 @@
-const TIPOS = ["Intro", "Verso", "Pré-Refrão", "Refrão", "Solo", "Ponte", "Instrumental", "Outro"];
+const TIPOS = ["Intro", "Verso", "Pré-Refrão", "Refrão", "Break", "Solo", "Ponte", "Instrumental", "Outro"];
 const API = "api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
