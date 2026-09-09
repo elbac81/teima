@@ -1,9 +1,0 @@
-name: Diag bg check
-on: workflow_dispatch
-jobs:
-  diag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: verify sync-status location
-        run: |
-          curl -s --max-time 20 -u teima:fareja https://teima.space/ensaios/ | grep -B3 -A3 'sync-status'
