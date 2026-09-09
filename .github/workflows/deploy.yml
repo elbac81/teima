@@ -11,6 +11,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Stamp cache-busting build id
+        run: sed -i "s/__BUILD__/${{ github.sha }}/g" index.html
+
       - name: Upload via FTP (ensaios)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
