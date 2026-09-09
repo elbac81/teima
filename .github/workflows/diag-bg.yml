@@ -1,0 +1,12 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify menu
+        run: |
+          echo "--- menu-toggle in HTML ---"
+          curl -s --max-time 20 -u teima:fareja https://teima.space/ensaios/ | grep -c 'menu-toggle'
+          echo "--- menu-toggle CSS rule ---"
+          curl -s --max-time 20 -u teima:fareja "https://teima.space/ensaios/assets/css/style.css?v=93dd412bdfdec9cf2688b160cd4651f70d7f6c83" | grep -A5 '^\.menu-toggle {'
