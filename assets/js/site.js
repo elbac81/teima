@@ -4,7 +4,7 @@ const ESTADOS = {
   ensaio: "Em ensaio",
   pronta: "Pronta a tocar",
 };
-const API = "api.php";
+const API = "/ensaios/api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
 
