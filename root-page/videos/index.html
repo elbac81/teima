@@ -3,42 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Teima</title>
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" href="favicon-32.png" sizes="32x32">
-  <link rel="apple-touch-icon" href="favicon-180.png">
-  <link rel="stylesheet" href="site.css">
-  <style>
-    body {
-      background:
-        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)),
-        url("bg.jpg") center / cover no-repeat fixed;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-      position: relative;
-    }
-    .logo {
-      width: 100%;
-      max-width: 300px;
-      height: auto;
-      display: block;
-    }
-    @media (max-width: 600px) {
-      .logo { transform: translateY(-7vh); }
-    }
-  </style>
+  <title>Vídeos — Teima</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/favicon-180.png">
+  <link rel="stylesheet" href="/site.css">
 </head>
 <body>
-  <img class="logo" src="teima_logo.png" alt="TEIMA">
+  <a class="page-home-link" href="/" aria-label="Teima — início">
+    <img src="/teima_logo.png" alt="TEIMA">
+  </a>
 
   <div class="topbar-actions">
     <nav class="nav-links">
       <a href="/socials/">Socials</a>
       <a href="/musica/">Música</a>
-      <a href="/videos/">Vídeos</a>
+      <a href="/videos/" aria-current="page">Vídeos</a>
       <a href="/sobre/">Sobre/Contactos</a>
     </nav>
     <details class="nav-toggle">
@@ -48,7 +28,7 @@
       <div class="nav-panel">
         <a href="/socials/">Socials</a>
         <a href="/musica/">Música</a>
-        <a href="/videos/">Vídeos</a>
+        <a href="/videos/" aria-current="page">Vídeos</a>
         <a href="/sobre/">Sobre/Contactos</a>
       </div>
     </details>
@@ -59,5 +39,13 @@
       </svg>
     </a>
   </div>
+
+  <main class="page">
+    <div class="page-content">
+      <span class="eyebrow">Teima</span>
+      <h1>Vídeos</h1>
+      <p>Em breve.</p>
+    </div>
+  </main>
 </body>
 </html>
