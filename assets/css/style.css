@@ -108,6 +108,7 @@ body {
 }
 .new-song-btn:hover { filter: brightness(1.08); }
 .new-song-btn:active { filter: brightness(0.95); }
+.new-song-btn.page-btn { background: var(--accent); color: #1c1503; }
 
 .menu-toggle {
   position: relative;

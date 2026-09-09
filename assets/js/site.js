@@ -181,7 +181,7 @@ function renderRepertoriosList(main) {
     </a>
     <div class="repertorios-head">
       <h2>Repertórios</h2>
-      <button class="new-song-btn" id="newRepertorioBtn">+ Novo repertório</button>
+      <button class="new-song-btn page-btn" id="newRepertorioBtn">+ Novo repertório</button>
     </div>
     ${
       reps.length === 0
