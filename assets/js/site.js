@@ -21,17 +21,21 @@ function currentSong() {
   return state.songs.find((s) => s.id === currentSongId) || null;
 }
 
-function songIdFromHash() {
-  const m = location.hash.match(/^#\/(.+)$/);
-  return m ? decodeURIComponent(m[1]) : null;
+const SONG_PATH_PREFIX = "/ensaios/musica/";
+
+function songUrl(id) {
+  return SONG_PATH_PREFIX + encodeURIComponent(id);
 }
 
-function setHashForSong(id) {
-  if (id) {
-    if (location.hash !== "#/" + encodeURIComponent(id)) history.pushState(null, "", "#/" + encodeURIComponent(id));
-  } else if (location.hash) {
-    history.pushState(null, "", location.pathname + location.search);
-  }
+function songIdFromPath() {
+  if (!location.pathname.startsWith(SONG_PATH_PREFIX)) return null;
+  const id = location.pathname.slice(SONG_PATH_PREFIX.length).replace(/\/$/, "");
+  return id ? decodeURIComponent(id) : null;
+}
+
+function setPathForSong(id) {
+  const target = id ? songUrl(id) : "/ensaios/";
+  if (location.pathname !== target) history.pushState(null, "", target);
 }
 
 function setSyncStatus(kind, label) {
@@ -106,19 +110,21 @@ function renderSongList() {
   el.innerHTML = songs
     .map(
       (s) => `
-    <button class="song-item ${s.id === currentSongId ? "active" : ""}" data-id="${s.id}">
+    <a class="song-item ${s.id === currentSongId ? "active" : ""}" data-id="${s.id}" href="${songUrl(s.id)}">
       <span class="t">${escapeHtml(s.title || "Sem título")}</span>
       <span class="meta">
         <span class="artist">${escapeHtml(s.artist || "")}</span>
         ${s.tom ? `<span class="tom-pill">${escapeHtml(s.tom)}</span>` : ""}
       </span>
-    </button>`
+    </a>`
     )
     .join("");
-  el.querySelectorAll(".song-item").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentSongId = btn.dataset.id;
-      setHashForSong(currentSongId);
+  el.querySelectorAll(".song-item").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      currentSongId = link.dataset.id;
+      setPathForSong(currentSongId);
       renderSongList();
       renderMain();
     });
@@ -267,7 +273,7 @@ function addNewSong() {
   const song = { id: uid(), title: "Nova música", artist: "", tom: "", bpm: "", order: nextOrder, sections: [] };
   state.songs.push(song);
   currentSongId = song.id;
-  setHashForSong(currentSongId);
+  setPathForSong(currentSongId);
   saveState();
   renderSongList();
   renderMain();
@@ -277,15 +283,15 @@ function deleteSong(id) {
   state.songs = state.songs.filter((s) => s.id !== id);
   if (currentSongId === id) {
     currentSongId = null;
-    setHashForSong(null);
+    setPathForSong(null);
   }
   saveState();
   renderSongList();
   renderMain();
 }
 
-function applyHash() {
-  const id = songIdFromHash();
+function applyPath() {
+  const id = songIdFromPath();
   if (id && state.songs.find((s) => s.id === id)) {
     currentSongId = id;
   } else if (!id) {
@@ -299,11 +305,11 @@ async function init() {
   document.getElementById("newSongBtn").addEventListener("click", addNewSong);
   setSyncStatus("ok", "a carregar…");
   await loadState();
-  const initialId = songIdFromHash();
+  const initialId = songIdFromPath();
   if (initialId && state.songs.find((s) => s.id === initialId)) currentSongId = initialId;
   renderSongList();
   renderMain();
-  window.addEventListener("hashchange", applyHash);
+  window.addEventListener("popstate", applyPath);
   pollTimer = setInterval(pollForUpdates, POLL_MS);
   window.addEventListener("beforeunload", () => {
     if (dirty) {

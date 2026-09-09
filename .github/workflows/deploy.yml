@@ -23,6 +23,7 @@ jobs:
             **/.git*
             **/.git*/**
             **/.github/**
+            root-page/**
 
       - name: Upload via FTP (domain root landing page)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

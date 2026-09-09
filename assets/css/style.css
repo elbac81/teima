@@ -149,6 +149,7 @@ body {
   cursor: pointer;
   background: transparent;
   text-align: left;
+  text-decoration: none;
   width: 100%;
   font-family: inherit;
   color: var(--rail-text);
