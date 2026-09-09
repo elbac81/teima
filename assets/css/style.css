@@ -296,6 +296,17 @@ input.title-field:focus { outline: none; }
   gap: 22px;
   flex-wrap: wrap;
 }
+@media (min-width: 1000px) {
+  .song-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .title-row { flex: 1; min-width: 260px; }
+  .field-row { flex-shrink: 0; }
+}
 .field {
   display: flex;
   flex-direction: column;
