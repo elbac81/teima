@@ -1,0 +1,14 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check index.html headers and content
+        run: |
+          echo "--- index.html headers ---"
+          curl -sD - -o /dev/null --max-time 20 https://teima.space/ensaios/
+          echo "--- index.html js/css refs ---"
+          curl -s --max-time 20 https://teima.space/ensaios/ | grep -E 'style.css|site.js'
+          echo "--- api.php sample (lixo song) ---"
+          curl -s --max-time 20 https://teima.space/ensaios/api.php | python3 -c "import json,sys; d=json.load(sys.stdin); s=[x for x in d['songs'] if x['id']=='lixo'][0]; print(s['sections'][0])"
