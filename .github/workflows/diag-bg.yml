@@ -1,8 +1,0 @@
-name: Diag bg check
-on: workflow_dispatch
-jobs:
-  diag:
-    runs-on: ubuntu-latest
-    steps:
-      - name: curl doc root probe
-        run: curl -s --max-time 20 https://teima.space/ensaios/diag-path.php
