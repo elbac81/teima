@@ -27,7 +27,6 @@ function songIdFromHash() {
 }
 
 function setHashForSong(id) {
-  const target = id ? "#/" + encodeURIComponent(id) : " ";
   if (id) {
     if (location.hash !== "#/" + encodeURIComponent(id)) history.pushState(null, "", "#/" + encodeURIComponent(id));
   } else if (location.hash) {
