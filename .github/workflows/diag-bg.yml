@@ -4,6 +4,8 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: sample live data
+      - name: sample live data with timeout
         run: |
-          curl -s https://teima.space/ensaios/api.php | head -c 3000
+          curl -sS --max-time 20 -D - -o /tmp/out.json https://teima.space/ensaios/api.php || echo "CURL EXIT CODE: $?"
+          echo "--- first 3000 bytes of body ---"
+          head -c 3000 /tmp/out.json || true
