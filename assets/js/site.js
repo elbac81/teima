@@ -199,8 +199,11 @@ function renderMain() {
               </div>
             </div>
             <div class="section-fields">
+              <label class="field-label">Cifra</label>
               <textarea class="cifra" data-field="cifra" rows="4" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
+              <label class="field-label">Letra</label>
               <textarea class="letra" data-field="letra" rows="3" placeholder="Letra desta secção…">${escapeHtml(sec.letra || "")}</textarea>
+              <label class="field-label">Notas</label>
               <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
             </div>
           </div>

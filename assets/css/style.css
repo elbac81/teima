@@ -505,9 +505,19 @@ input.tom-field::placeholder { color: var(--text-dim); opacity: 0.6; }
 .section-fields {
   display: none;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 .section-card.open .section-fields { display: flex; }
+.section-fields .field-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.section-fields .field-label:first-child { margin-top: 0; }
+.section-fields textarea { margin-bottom: 6px; }
 
 textarea.cifra {
   font-family: 'Space Mono', monospace;
