@@ -131,6 +131,8 @@ function renderSongList() {
       e.preventDefault();
       currentSongId = link.dataset.id;
       setPathForSong(currentSongId);
+      const dropdown = document.getElementById("songDropdown");
+      if (dropdown) dropdown.open = false;
       renderSongList();
       renderMain();
     });
@@ -140,7 +142,6 @@ function renderSongList() {
 function renderMain() {
   const main = document.getElementById("main");
   const song = currentSong();
-  document.querySelector(".shell").classList.toggle("song-open", !!song);
   if (!song) {
     main.innerHTML = `<div class="empty-state"></div>`;
     return;
@@ -150,10 +151,6 @@ function renderMain() {
 
   const estado = song.estado || "composicao";
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-      Todas as músicas
-    </a>
     <div class="song-header">
       <div class="title-row">
         <input class="title-field" id="titleInput" placeholder="Título da música" value="${escapeHtml(song.title || "")}" />
@@ -240,14 +237,6 @@ function renderMain() {
     renderSongList();
   });
   document.getElementById("printBtn").addEventListener("click", () => window.print());
-  document.getElementById("backLink").addEventListener("click", (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    currentSongId = null;
-    setPathForSong(null);
-    renderSongList();
-    renderMain();
-  });
   document.getElementById("addSectionBtn").addEventListener("click", () => addSection(song));
 
   document.querySelectorAll("#structure .section-card").forEach((card, i, all) => {

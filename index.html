@@ -9,22 +9,26 @@
   <link rel="stylesheet" href="assets/css/style.css?v=__BUILD__" />
 </head>
 <body>
-  <div class="shell">
-    <div class="rail">
-      <div class="brand">
-        <img class="wordmark-img" src="assets/img/teima_logo.jpg" alt="TEIMA">
-        <span class="mark">notas de ensaio</span>
-      </div>
-      <button class="new-song-btn" id="newSongBtn">+ Nova música</button>
+  <header class="topbar">
+    <div class="brand">
+      <img class="wordmark-img" src="assets/img/teima_logo.jpg" alt="TEIMA">
+      <span class="mark">notas de ensaio</span>
+    </div>
+    <details class="song-dropdown" id="songDropdown">
+      <summary>
+        <span class="dd-label">Músicas</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </summary>
       <div class="song-list" id="songList">
         <div class="rail-empty">A carregar…</div>
       </div>
-      <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span class="label">—</span></div>
-    </div>
-    <div class="main" id="main">
-      <div class="empty-state"></div>
-    </div>
-  </div>
+    </details>
+    <button class="new-song-btn" id="newSongBtn">+ Nova música</button>
+    <div class="sync-status" id="syncStatus"><span class="sync-dot"></span><span class="label">—</span></div>
+  </header>
+  <main class="main" id="main">
+    <div class="empty-state"></div>
+  </main>
   <script src="assets/js/site.js?v=__BUILD__"></script>
 </body>
 </html>
