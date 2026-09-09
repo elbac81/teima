@@ -9,13 +9,16 @@
   <link rel="apple-touch-icon" href="favicon-180.png">
   <link rel="stylesheet" href="site.css">
   <style>
-    body {
+    body { background: var(--bg); }
+    .hero {
       background:
         linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)),
         url("bg.jpg") center / cover no-repeat fixed;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 36px;
       min-height: 100vh;
       padding: 24px;
       position: relative;
@@ -29,10 +32,98 @@
     @media (max-width: 600px) {
       .logo { transform: translateY(-7vh); }
     }
+
+    .events-section {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+    .events-section h2 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin: 0 0 20px;
+      text-align: center;
+    }
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .events-empty {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+      margin: 0;
+    }
+    .event-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      background: var(--panel);
+    }
+    .event-date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: rgba(232, 195, 74, 0.1);
+      color: var(--gold);
+    }
+    .event-date .day { font-size: 19px; font-weight: 700; line-height: 1; }
+    .event-date .mon { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
+    .event-info { flex: 1; min-width: 0; }
+    .event-info .title {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .event-info .place { font-size: 12.5px; color: var(--text-dim); margin-top: 2px; }
+    .event-link {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid rgba(232,195,74,0.4);
+      border-radius: 999px;
+      padding: 6px 12px;
+      white-space: nowrap;
+    }
+    .event-link:hover { background: rgba(232,195,74,0.08); }
   </style>
 </head>
 <body>
-  <img class="logo" src="teima_logo.png" alt="TEIMA">
+  <div class="hero">
+    <img class="logo" src="teima_logo.png" alt="TEIMA">
+
+    <div class="social-row">
+      <a class="icon-btn" href="https://www.facebook.com/teimaoficial17/" target="_blank" rel="noopener" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+      </a>
+      <a class="icon-btn" href="https://www.instagram.com/teimaoficial/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+      </a>
+      <a class="icon-btn" href="https://open.spotify.com/intl-pt/artist/7dySj0yYo2WCwtwBTR127B" target="_blank" rel="noopener" aria-label="Spotify">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M7 10.5c3-1 7-1 10 .5"></path><path d="M7.5 13.5c2.5-.8 6-.8 9 .5"></path><path d="M8 16.5c2-.6 4.5-.6 7 .3"></path></svg>
+      </a>
+      <a class="icon-btn" href="https://soundcloud.com/teimaoficial17" target="_blank" rel="noopener" aria-label="SoundCloud">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+      </a>
+    </div>
+  </div>
 
   <div class="topbar-actions">
     <nav class="nav-links">
@@ -60,19 +151,56 @@
     </a>
   </div>
 
-  <div class="social-row">
-    <a class="icon-btn" href="https://www.facebook.com/teimaoficial17/" target="_blank" rel="noopener" aria-label="Facebook">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-    </a>
-    <a class="icon-btn" href="https://www.instagram.com/teimaoficial/" target="_blank" rel="noopener" aria-label="Instagram">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-    </a>
-    <a class="icon-btn" href="https://open.spotify.com/intl-pt/artist/7dySj0yYo2WCwtwBTR127B" target="_blank" rel="noopener" aria-label="Spotify">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M7 10.5c3-1 7-1 10 .5"></path><path d="M7.5 13.5c2.5-.8 6-.8 9 .5"></path><path d="M8 16.5c2-.6 4.5-.6 7 .3"></path></svg>
-    </a>
-    <a class="icon-btn" href="https://soundcloud.com/teimaoficial17" target="_blank" rel="noopener" aria-label="SoundCloud">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-    </a>
-  </div>
+  <section class="events-section">
+    <h2>Próximos concertos</h2>
+    <div class="events-list" id="eventsList">
+      <p class="events-empty">A carregar…</p>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const MESES = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
+
+      function escapeHtml(s) {
+        return (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      }
+
+      fetch("/eventos.php", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((data) => {
+          const hoje = new Date().toISOString().slice(0, 10);
+          const eventos = (data.eventos || [])
+            .filter((e) => e.data && e.data >= hoje)
+            .sort((a, b) => a.data.localeCompare(b.data));
+          const list = document.getElementById("eventsList");
+          if (eventos.length === 0) {
+            list.innerHTML = '<p class="events-empty">Sem concertos marcados de momento.</p>';
+            return;
+          }
+          list.innerHTML = eventos
+            .map((e) => {
+              const [y, m, d] = e.data.split("-");
+              const mon = MESES[parseInt(m, 10) - 1] || "";
+              const link = e.link
+                ? `<a class="event-link" href="${escapeHtml(e.link)}" target="_blank" rel="noopener">Bilhetes</a>`
+                : "";
+              return `
+            <div class="event-card">
+              <div class="event-date"><span class="day">${d}</span><span class="mon">${mon}</span></div>
+              <div class="event-info">
+                <div class="title">${escapeHtml(e.titulo || "Concerto")}</div>
+                ${e.local ? `<div class="place">${escapeHtml(e.local)}${e.hora ? " · " + escapeHtml(e.hora) : ""}</div>` : ""}
+              </div>
+              ${link}
+            </div>`;
+            })
+            .join("");
+        })
+        .catch(() => {
+          document.getElementById("eventsList").innerHTML = '<p class="events-empty">Sem concertos marcados de momento.</p>';
+        });
+    })();
+  </script>
 </body>
 </html>

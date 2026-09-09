@@ -8,7 +8,7 @@ const API = "/ensaios/api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
 
-let state = { songs: [], repertorios: [] };
+let state = { songs: [], repertorios: [], eventos: [] };
 let currentSongId = null;
 let currentRepertorioId = null;
 let view = "home";
@@ -35,6 +35,7 @@ function currentRepertorio() {
 const SONG_PATH_PREFIX = "/ensaios/musica/";
 const REPERTORIO_PATH_PREFIX = "/ensaios/repertorio/";
 const REPERTORIOS_LIST_PATH = "/ensaios/repertorios";
+const EVENTOS_LIST_PATH = "/ensaios/eventos";
 
 function songUrl(id) {
   return SONG_PATH_PREFIX + encodeURIComponent(id);
@@ -58,6 +59,14 @@ function repertorioIdFromPath() {
 
 function isRepertoriosListPath() {
   return location.pathname.replace(/\/$/, "") === REPERTORIOS_LIST_PATH;
+}
+
+function isEventosListPath() {
+  return location.pathname.replace(/\/$/, "") === EVENTOS_LIST_PATH;
+}
+
+function setPathForEventosList() {
+  if (location.pathname !== EVENTOS_LIST_PATH) history.pushState(null, "", EVENTOS_LIST_PATH);
 }
 
 function setPathForSong(id) {
@@ -94,6 +103,7 @@ async function loadState({ silent } = {}) {
     const data = await res.json();
     state = data && Array.isArray(data.songs) ? data : { songs: [] };
     if (!Array.isArray(state.repertorios)) state.repertorios = [];
+    if (!Array.isArray(state.eventos)) state.eventos = [];
     setSyncStatus("ok", "sincronizado");
     return true;
   } catch (e) {
@@ -236,6 +246,9 @@ function renderRepertorioDetail(main, rep) {
     <div class="song-header">
       <div class="title-row">
         <input class="title-field" id="repNomeInput" placeholder="Nome do repertório" value="${escapeHtml(rep.nome || "")}" />
+        <button class="print-btn" id="repPrintBtn" title="Guardar e imprimir / PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
         <button class="mini-btn del" id="repDeleteBtn" title="Eliminar repertório">✕</button>
       </div>
       <div class="field-row">
@@ -300,6 +313,10 @@ function renderRepertorioDetail(main, rep) {
     rep.local = e.target.value;
     scheduleSave();
   });
+  document.getElementById("repPrintBtn").addEventListener("click", async () => {
+    await saveState();
+    window.print();
+  });
   document.getElementById("repDeleteBtn").addEventListener("click", () => {
     if (!confirm("Eliminar este repertório?")) return;
     state.repertorios = state.repertorios.filter((r) => r.id !== rep.id);
@@ -351,8 +368,89 @@ function addNewRepertorio() {
   renderMain();
 }
 
+function renderEventosList(main) {
+  const eventos = [...state.eventos].sort((a, b) => (a.data || "9999-99-99").localeCompare(b.data || "9999-99-99"));
+  main.innerHTML = `
+    <a class="back-link" href="/ensaios/" id="backLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Todas as músicas
+    </a>
+    <div class="repertorios-head">
+      <h2>Eventos</h2>
+      <button class="new-song-btn page-btn" id="newEventoBtn">+ Novo evento</button>
+    </div>
+    <p class="events-hint">Estes eventos aparecem publicamente no calendário de teima.space.</p>
+    <div class="structure" id="eventosStructure">
+      ${
+        eventos.length === 0
+          ? '<div class="no-sections">Ainda sem eventos. Cria o primeiro.</div>'
+          : eventos
+              .map(
+                (ev) => `
+        <div class="section-card" data-id="${ev.id}">
+          <div class="spine-col">
+            <div class="spine-dot"></div>
+            <div class="spine-line"></div>
+          </div>
+          <div class="section-body">
+            <div class="section-top">
+              <input class="evento-input date" type="date" data-field="data" value="${escapeHtml(ev.data || "")}" />
+              <input class="evento-input time" type="time" data-field="hora" value="${escapeHtml(ev.hora || "")}" />
+              <div class="section-actions">
+                <button class="mini-btn del" title="Eliminar evento">✕</button>
+              </div>
+            </div>
+            <div class="section-fields">
+              <input class="evento-input" data-field="titulo" placeholder="Nome do evento / concerto" value="${escapeHtml(ev.titulo || "")}" />
+              <input class="evento-input" data-field="local" placeholder="Local" value="${escapeHtml(ev.local || "")}" />
+              <input class="evento-input" data-field="link" placeholder="Link (bilhetes, evento, etc.) — opcional" value="${escapeHtml(ev.link || "")}" />
+            </div>
+          </div>
+        </div>`
+              )
+              .join("")
+      }
+    </div>
+  `;
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    view = "home";
+    setPathForSong(null);
+    renderMain();
+  });
+  document.getElementById("newEventoBtn").addEventListener("click", addNewEvento);
+  main.querySelectorAll("#eventosStructure .section-card").forEach((card) => {
+    const id = card.dataset.id;
+    const ev = state.eventos.find((e) => e.id === id);
+    card.querySelectorAll("[data-field]").forEach((input) => {
+      input.addEventListener("input", (e) => {
+        ev[e.target.dataset.field] = e.target.value;
+        scheduleSave();
+      });
+    });
+    card.querySelector(".del").addEventListener("click", () => {
+      if (!confirm("Eliminar este evento?")) return;
+      state.eventos = state.eventos.filter((e) => e.id !== id);
+      saveState();
+      renderMain();
+    });
+  });
+}
+
+function addNewEvento() {
+  const evento = { id: uid(), titulo: "", data: "", hora: "", local: "", link: "" };
+  state.eventos.push(evento);
+  saveState();
+  renderMain();
+}
+
 function renderMain() {
   const main = document.getElementById("main");
+  if (view === "eventos") {
+    renderEventosList(main);
+    return;
+  }
   if (view === "repertorios") {
     renderRepertoriosList(main);
     return;
@@ -556,6 +654,10 @@ function applyPath() {
     currentSongId = null;
     currentRepertorioId = null;
     view = "repertorios";
+  } else if (isEventosListPath()) {
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "eventos";
   } else {
     currentSongId = null;
     currentRepertorioId = null;
