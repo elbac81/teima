@@ -1,0 +1,12 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: curl logo files
+        run: |
+          echo "--- teima_logo.png ---"
+          curl -sD - -o /dev/null https://teima.space/teima_logo.png
+          echo "--- teima_logo.jpg ---"
+          curl -sD - -o /dev/null https://teima.space/teima_logo.jpg
