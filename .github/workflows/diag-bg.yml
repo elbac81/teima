@@ -4,6 +4,11 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: dump live data
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: POST merged musicas.json to live api.php
         run: |
-          curl -sS --max-time 20 https://teima.space/ensaios/api.php
+          curl -sS --max-time 20 -X POST -H "Content-Type: application/json" --data-binary @dados/musicas.json https://teima.space/ensaios/api.php
+          echo
+          echo "--- verify GET back ---"
+          curl -sS --max-time 20 https://teima.space/ensaios/api.php | head -c 1200
