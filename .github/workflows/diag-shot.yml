@@ -15,7 +15,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Screenshot expanded section
         run: node shot.js
-      - uses: actions/upload-artifact@v4
-        with:
-          name: screenshot
-          path: screenshot.png
+      - name: Print as base64
+        run: |
+          echo "BASE64_START"
+          base64 -w 120 screenshot.png
+          echo "BASE64_END"
