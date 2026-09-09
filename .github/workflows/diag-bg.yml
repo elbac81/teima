@@ -1,0 +1,12 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify auth gate
+        run: |
+          curl -s -o /dev/null -w "no-auth status: %{http_code}\n" --max-time 20 https://teima.space/ensaios/
+          curl -s -o /dev/null -w "correct-auth status: %{http_code}\n" --max-time 20 -u teima:fareja https://teima.space/ensaios/
+          curl -s -o /dev/null -w "wrong-auth status: %{http_code}\n" --max-time 20 -u teima:wrongpass https://teima.space/ensaios/
+          curl -s -o /dev/null -w "htpasswd direct fetch status: %{http_code}\n" --max-time 20 https://teima.space/ensaios/.htpasswd
