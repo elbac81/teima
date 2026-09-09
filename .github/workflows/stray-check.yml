@@ -7,10 +7,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: List ensaios/ contents
+      - name: Remove stray ensaios/root-page/
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
+          curl -s -Q "DELE ensaios/root-page/index.html" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          curl -s -Q "DELE ensaios/root-page/teima_logo.jpg" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          curl -s -Q "RMD ensaios/root-page" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          echo "=== final ensaios/ listing ==="
           curl -s "ftp://$FTP_HOST/ensaios/" --user "$FTP_USERNAME:$FTP_PASSWORD"
