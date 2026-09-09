@@ -70,6 +70,11 @@ body {
   .rail { border-right: none; border-bottom: 1px solid #35323a; }
 }
 
+/* Song page: hide the setlist rail entirely, give the song the whole screen */
+.shell.song-open { grid-template-columns: 1fr; }
+.shell.song-open .rail { display: none; }
+.shell.song-open .main { margin: 0 auto; }
+
 /* ---- Rail (setlist) — fixed gig-poster identity, independent of viewer theme ---- */
 .rail {
   --rail-bg: #14171b;
@@ -255,6 +260,21 @@ body {
   margin: 0;
 }
 .empty-state p { color: var(--text-dim); line-height: 1.6; margin: 0; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--accent); }
+.back-link svg { width: 14px; height: 14px; }
 
 .song-header {
   display: flex;
@@ -543,7 +563,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 
 /* ---- Print / PDF: one song, all sections expanded, plain text ---- */
 @media print {
-  .rail, .sync-status, .print-btn, .add-section-btn,
+  .rail, .sync-status, .print-btn, .add-section-btn, .back-link,
   .section-actions, .mini-btn.toggle, .empty-state {
     display: none !important;
   }
