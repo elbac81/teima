@@ -4,11 +4,7 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: verify home grid
+      - name: recheck site.js versioned
         run: |
-          echo "--- dropdown remnants in HTML ---"
-          curl -s --max-time 20 -u teima:fareja https://teima.space/ensaios/ | grep -c 'song-dropdown\|dd-label' || true
-          echo "--- dropdown remnants in JS ---"
-          curl -s --max-time 20 -u teima:fareja https://teima.space/ensaios/assets/js/site.js | grep -c 'renderSongList\|songDropdown' || true
-          echo "--- song-card class present in CSS ---"
-          curl -s --max-time 20 -u teima:fareja "https://teima.space/ensaios/assets/css/style.css?v=d4644556723e755314913eb17d8c552ea0fc7625" | grep -c '\.song-card {' || true
+          echo "--- dropdown remnants in JS (versioned, bypass CDN cache) ---"
+          curl -s --max-time 20 -u teima:fareja "https://teima.space/ensaios/assets/js/site.js?v=d4644556723e755314913eb17d8c552ea0fc7625" | grep -c 'renderSongList\|songDropdown' || true
