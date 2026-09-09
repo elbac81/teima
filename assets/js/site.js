@@ -8,6 +8,7 @@ let currentSongId = null;
 let saveTimer = null;
 let pollTimer = null;
 let dirty = false;
+let expandedSections = new Set();
 
 function uid() {
   return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -163,15 +164,19 @@ function renderMain() {
         sections.length === 0
           ? '<div class="no-sections">Ainda sem secções. Adiciona a primeira (intro, verso…).</div>'
           : sections
-              .map(
-                (sec) => `
-        <div class="section-card" data-id="${sec.id}">
+              .map((sec) => {
+                const open = expandedSections.has(sec.id);
+                return `
+        <div class="section-card ${open ? "open" : ""}" data-id="${sec.id}">
           <div class="spine-col">
             <div class="spine-dot"></div>
             <div class="spine-line"></div>
           </div>
           <div class="section-body">
             <div class="section-top">
+              <button class="mini-btn toggle" title="${open ? "Fechar" : "Abrir"} secção">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
               <select class="type-select" data-field="tipo">
                 ${TIPOS.map((t) => `<option value="${t}" ${t === sec.tipo ? "selected" : ""}>${t}</option>`).join("")}
               </select>
@@ -182,11 +187,13 @@ function renderMain() {
                 <button class="mini-btn del" title="Eliminar secção">✕</button>
               </div>
             </div>
-            <textarea class="cifra" data-field="cifra" rows="4" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
-            <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+            <div class="section-fields">
+              <textarea class="cifra" data-field="cifra" rows="4" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
+              <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+            </div>
           </div>
-        </div>`
-              )
+        </div>`;
+              })
               .join("")
       }
     </div>
@@ -237,6 +244,11 @@ function renderMain() {
     card.querySelector(".up").addEventListener("click", () => moveSection(song, i, -1, sections));
     card.querySelector(".down").addEventListener("click", () => moveSection(song, i, 1, sections));
     card.querySelector(".del").addEventListener("click", () => deleteSection(song, secId));
+    card.querySelector(".toggle").addEventListener("click", () => {
+      if (expandedSections.has(secId)) expandedSections.delete(secId);
+      else expandedSections.add(secId);
+      card.classList.toggle("open");
+    });
   });
 }
 
