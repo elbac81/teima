@@ -1,0 +1,26 @@
+name: Remove site files from account root (temporary)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete site files/folders left at account root
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          for f in api.php index.html README.md .ftp-deploy-sync-state-root.json; do
+            curl -s -Q "DELE $f" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          done
+          for f in assets/css/style.css assets/js/site.js assets/img/teima_logo.jpg dados/musicas.json dados/.htaccess; do
+            curl -s -Q "DELE $f" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          done
+          for d in assets/css assets/js assets/img assets dados; do
+            curl -s -Q "RMD $d" "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
+          done
+          echo "=== final account root listing ==="
+          curl -s --list-only "ftp://$FTP_HOST/" --user "$FTP_USERNAME:$FTP_PASSWORD" || true
