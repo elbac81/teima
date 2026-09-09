@@ -96,53 +96,53 @@ async function pollForUpdates() {
   if (dirty || anyFieldFocused()) return;
   const prevSongId = currentSongId;
   await loadState({ silent: true });
-  renderSongList();
   if (prevSongId && !state.songs.find((s) => s.id === prevSongId)) {
     currentSongId = null;
-    renderMain();
-  } else if (prevSongId) {
-    renderMain();
   }
+  renderMain();
 }
 
-function renderSongList() {
-  const el = document.getElementById("songList");
+function renderHomeGrid() {
   const songs = [...state.songs].sort((a, b) => (a.order || 0) - (b.order || 0));
   if (songs.length === 0) {
-    el.innerHTML = '<div class="rail-empty">Ainda sem músicas. Cria a primeira.</div>';
-    return;
+    return `
+    <div class="empty-state">
+      <span class="eyebrow">Teima</span>
+      <h2>Notas de ensaio</h2>
+      <p>Ainda sem músicas. Cria a primeira.</p>
+    </div>`;
   }
-  el.innerHTML = songs
-    .map(
-      (s) => `
-    <a class="song-item ${s.id === currentSongId ? "active" : ""}" data-id="${s.id}" href="${songUrl(s.id)}">
-      <span class="t"><span class="status-dot ${s.estado || "composicao"}" title="${ESTADOS[s.estado] || ESTADOS.composicao}"></span>${escapeHtml(s.title || "Sem título")}</span>
-      <span class="meta">
-        <span class="artist">${escapeHtml(s.artist || "")}</span>
-        ${s.tom ? `<span class="tom-pill">${escapeHtml(s.tom)}</span>` : ""}
-      </span>
-    </a>`
-    )
-    .join("");
-  el.querySelectorAll(".song-item").forEach((link) => {
-    link.addEventListener("click", (e) => {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      e.preventDefault();
-      currentSongId = link.dataset.id;
-      setPathForSong(currentSongId);
-      const dropdown = document.getElementById("songDropdown");
-      if (dropdown) dropdown.open = false;
-      renderSongList();
-      renderMain();
-    });
-  });
+  return `
+    <div class="song-grid">
+      ${songs
+        .map(
+          (s) => `
+      <a class="song-card" data-id="${s.id}" href="${songUrl(s.id)}">
+        <span class="t"><span class="status-dot ${s.estado || "composicao"}" title="${ESTADOS[s.estado] || ESTADOS.composicao}"></span>${escapeHtml(s.title || "Sem título")}</span>
+        <span class="meta">
+          <span class="artist">${escapeHtml(s.artist || "")}</span>
+          ${s.tom ? `<span class="tom-pill">${escapeHtml(s.tom)}</span>` : ""}
+        </span>
+      </a>`
+        )
+        .join("")}
+    </div>`;
 }
 
 function renderMain() {
   const main = document.getElementById("main");
   const song = currentSong();
   if (!song) {
-    main.innerHTML = `<div class="empty-state"></div>`;
+    main.innerHTML = renderHomeGrid();
+    main.querySelectorAll(".song-card").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        currentSongId = card.dataset.id;
+        setPathForSong(currentSongId);
+        renderMain();
+      });
+    });
     return;
   }
 
@@ -150,6 +150,10 @@ function renderMain() {
 
   const estado = song.estado || "composicao";
   main.innerHTML = `
+    <a class="back-link" href="/ensaios/" id="backLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Todas as músicas
+    </a>
     <div class="song-header">
       <div class="title-row">
         <input class="title-field" id="titleInput" placeholder="Título da música" value="${escapeHtml(song.title || "")}" />
@@ -211,17 +215,14 @@ function renderMain() {
   document.getElementById("titleInput").addEventListener("input", (e) => {
     song.title = e.target.value;
     scheduleSave();
-    renderSongList();
   });
   document.getElementById("artistInput").addEventListener("input", (e) => {
     song.artist = e.target.value;
     scheduleSave();
-    renderSongList();
   });
   document.getElementById("tomInput").addEventListener("input", (e) => {
     song.tom = e.target.value;
     scheduleSave();
-    renderSongList();
   });
   document.getElementById("bpmInput").addEventListener("input", (e) => {
     song.bpm = e.target.value;
@@ -231,9 +232,15 @@ function renderMain() {
     song.estado = e.target.value;
     e.target.className = "estado-select " + e.target.value;
     scheduleSave();
-    renderSongList();
   });
   document.getElementById("printBtn").addEventListener("click", () => window.print());
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentSongId = null;
+    setPathForSong(null);
+    renderMain();
+  });
   document.getElementById("addSectionBtn").addEventListener("click", () => addSection(song));
 
   document.querySelectorAll("#structure .section-card").forEach((card, i, all) => {
@@ -296,7 +303,6 @@ function addNewSong() {
   currentSongId = song.id;
   setPathForSong(currentSongId);
   saveState();
-  renderSongList();
   renderMain();
 }
 
@@ -307,7 +313,6 @@ function applyPath() {
   } else if (!id) {
     currentSongId = null;
   }
-  renderSongList();
   renderMain();
 }
 
@@ -328,11 +333,17 @@ function hidePrintText() {
 
 async function init() {
   document.getElementById("newSongBtn").addEventListener("click", addNewSong);
+  document.getElementById("homeLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentSongId = null;
+    setPathForSong(null);
+    renderMain();
+  });
   setSyncStatus("ok", "a carregar…");
   await loadState();
   const initialId = songIdFromPath();
   if (initialId && state.songs.find((s) => s.id === initialId)) currentSongId = initialId;
-  renderSongList();
   renderMain();
   window.addEventListener("popstate", applyPath);
   window.addEventListener("beforeprint", showPrintText);
