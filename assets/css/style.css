@@ -11,7 +11,7 @@
   --petrol: #2f6470;
   --danger: #a1402f;
 
-  --bg: var(--paper);
+  --bg: #14171b;
   --surface: var(--paper-surface);
   --surface-2: var(--paper-surface-2);
   --text: var(--paper-text);
@@ -21,40 +21,16 @@
   --accent-2: var(--petrol);
   --danger-c: var(--danger);
   --shadow: 0 1px 2px rgba(30, 20, 0, 0.08), 0 6px 20px rgba(30, 20, 0, 0.06);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #14171b;
-    --surface: #1c2027;
-    --surface-2: #262b34;
-    --text: #f2ede0;
-    --text-dim: #9a9488;
-    --border: #343a44;
-    --accent: #e8c34a;
-    --accent-2: #4d95a6;
-    --danger-c: #d9765f;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #14171b;
-  --surface: #1c2027;
-  --surface-2: #262b34;
-  --text: #f2ede0;
-  --text-dim: #9a9488;
-  --border: #343a44;
-  --accent: #e8c34a;
-  --accent-2: #4d95a6;
-  --danger-c: #d9765f;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --page-text: #f2ede0;
+  --page-text-dim: #9a9488;
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
   background: var(--bg);
-  color: var(--text);
+  color: var(--page-text);
   font-family: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
   min-height: 100vh;
   margin: 0;
@@ -218,12 +194,12 @@ body {
 
 /* ---- Main / song detail ---- */
 .main {
-  padding: 36px 44px 80px;
+  padding: 18px 44px 80px;
   max-width: 760px;
   margin: 0 auto;
 }
 @media (max-width: 600px) {
-  .main { padding: 24px 18px 60px; }
+  .main { padding: 12px 18px 60px; }
 }
 @media (min-width: 1000px) {
   .main { max-width: 90vw; }
@@ -249,18 +225,18 @@ body {
   font-size: 26px;
   margin: 0;
 }
-.empty-state p { color: var(--text-dim); line-height: 1.6; margin: 0; }
+.empty-state p { color: var(--page-text-dim); line-height: 1.6; margin: 0; }
 
 .back-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
   font-family: 'Space Mono', monospace;
   font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-dim);
+  color: var(--page-text-dim);
   text-decoration: none;
 }
 .back-link:hover { color: var(--accent); }
@@ -269,10 +245,14 @@ body {
 .song-header {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-bottom: 22px;
-  margin-bottom: 26px;
-  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 18px;
 }
 .title-row {
   display: flex;
@@ -310,17 +290,6 @@ input.title-field:focus { outline: none; }
 }
 .print-btn:hover { border-color: var(--accent); color: var(--accent); }
 .print-btn svg { width: 16px; height: 16px; }
-
-input.artist-field {
-  font-family: 'Work Sans', sans-serif;
-  font-size: 15px;
-  color: var(--text-dim);
-  background: transparent;
-  border: none;
-  padding: 2px 0;
-  width: 100%;
-}
-input.artist-field:focus { outline: none; color: var(--text); }
 
 .field-row {
   display: flex;
@@ -420,6 +389,7 @@ input.artist-field:focus { outline: none; color: var(--text); }
 .section-body {
   flex: 1;
   background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 16px 16px;
@@ -537,7 +507,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   gap: 7px;
   background: none;
   border: 1px dashed var(--border);
-  color: var(--text-dim);
+  color: var(--page-text-dim);
   padding: 9px 14px;
   border-radius: 8px;
   font-family: 'Work Sans', sans-serif;
@@ -549,7 +519,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 
 .no-sections {
   margin-left: 36px;
-  color: var(--text-dim);
+  color: var(--page-text-dim);
   font-size: 13px;
   padding: 6px 0 16px;
 }
@@ -566,10 +536,10 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   .section-actions, .empty-state {
     display: none !important;
   }
-  html, body { background: #fff; }
+  html, body { background: #fff; color: #000; }
   .main { max-width: none; padding: 0; }
-  .song-header { border-bottom-color: #ccc; }
-  input.title-field, input.artist-field, .field input, .estado-select,
+  .song-header { background: transparent; border: none; box-shadow: none; padding: 0 0 16px; }
+  input.title-field, .field input, .estado-select,
   select.type-select, input.tom-field {
     background: transparent !important;
     border: none !important;

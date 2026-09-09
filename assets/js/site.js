@@ -161,7 +161,6 @@ function renderMain() {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         </button>
       </div>
-      <input class="artist-field" id="artistInput" placeholder="Artista / autor" value="${escapeHtml(song.artist || "")}" />
       <div class="field-row">
         <div class="field"><label>Tom</label><input id="tomInput" placeholder="ex. Sol" value="${escapeHtml(song.tom || "")}" /></div>
         <div class="field"><label>BPM</label><input id="bpmInput" placeholder="ex. 96" inputmode="numeric" value="${escapeHtml(song.bpm || "")}" /></div>
@@ -198,8 +197,7 @@ function renderMain() {
               </div>
             </div>
             <div class="section-fields">
-              <label class="field-label">Cifra</label>
-              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, tal como numa cifra">${escapeHtml(sec.cifra || "")}</textarea>
+              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
               <label class="field-label">Notas</label>
               <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
             </div>
@@ -214,10 +212,6 @@ function renderMain() {
 
   document.getElementById("titleInput").addEventListener("input", (e) => {
     song.title = e.target.value;
-    scheduleSave();
-  });
-  document.getElementById("artistInput").addEventListener("input", (e) => {
-    song.artist = e.target.value;
     scheduleSave();
   });
   document.getElementById("tomInput").addEventListener("input", (e) => {
