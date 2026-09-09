@@ -491,23 +491,11 @@ input.tom-field::placeholder { color: var(--text-dim); opacity: 0.6; }
 .mini-btn:hover { background: var(--surface-2); color: var(--text); }
 .mini-btn.del:hover { color: var(--danger-c); }
 
-.mini-btn.toggle {
-  order: -1;
-  margin-right: 2px;
-}
-.mini-btn.toggle svg {
-  width: 14px;
-  height: 14px;
-  transition: transform 0.15s ease;
-}
-.section-card.open .mini-btn.toggle svg { transform: rotate(90deg); }
-
 .section-fields {
-  display: none;
+  display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.section-card.open .section-fields { display: flex; }
 .section-fields .field-label {
   font-family: 'Space Mono', monospace;
   font-size: 10px;
@@ -587,7 +575,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 /* ---- Print / PDF: one song, all sections expanded, plain text ---- */
 @media print {
   .topbar, .print-btn, .add-section-btn,
-  .section-actions, .mini-btn.toggle, .empty-state {
+  .section-actions, .empty-state {
     display: none !important;
   }
   html, body { background: #fff; }
@@ -604,7 +592,6 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   .section-card { break-inside: avoid; page-break-inside: avoid; }
   .section-body { box-shadow: none; border-color: #ccc; }
   .spine-dot, .spine-line { background: #999; border-color: #fff; }
-  .section-fields { display: flex !important; }
   textarea.print-hidden { display: none !important; }
   .print-text {
     display: block;
