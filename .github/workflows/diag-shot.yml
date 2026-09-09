@@ -1,0 +1,20 @@
+name: Diag screenshot
+on: workflow_dispatch
+jobs:
+  shot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install playwright
+        run: |
+          npm init -y
+          npm i -D playwright@1.47.0
+          npx playwright install --with-deps chromium
+      - name: Screenshot expanded section
+        run: node shot.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: screenshot.png
