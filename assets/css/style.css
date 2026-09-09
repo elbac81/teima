@@ -165,7 +165,19 @@ body {
   font-weight: 600;
   font-size: 15px;
   line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 7px;
 }
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--rail-text-dim);
+}
+.status-dot.ensaio { background: var(--rail-accent); }
+.status-dot.pronta { background: #5fb87a; }
 .song-item .meta {
   display: flex;
   align-items: center;
@@ -270,6 +282,24 @@ input.title-field {
   padding: 2px 0;
 }
 input.title-field:focus { outline: none; }
+
+.print-btn {
+  flex-shrink: 0;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.print-btn:hover { border-color: var(--accent); color: var(--accent); }
+.print-btn svg { width: 16px; height: 16px; }
+
 input.artist-field {
   font-family: 'Work Sans', sans-serif;
   font-size: 15px;
@@ -310,6 +340,22 @@ input.artist-field:focus { outline: none; color: var(--text); }
   width: 90px;
 }
 .field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.estado-select {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  color: var(--text-dim);
+  width: auto;
+}
+.estado-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.estado-select.ensaio { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.estado-select.pronta { color: #5fb87a; border-color: color-mix(in srgb, #5fb87a 40%, transparent); background: color-mix(in srgb, #5fb87a 12%, transparent); }
 
 /* ---- Structure spine ---- */
 .structure {
@@ -492,4 +538,35 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
+}
+
+/* ---- Print / PDF: one song, all sections expanded, plain text ---- */
+@media print {
+  .rail, .sync-status, .print-btn, .add-section-btn,
+  .section-actions, .mini-btn.toggle, .empty-state {
+    display: none !important;
+  }
+  html, body { background: #fff; }
+  .main { max-width: none; padding: 0; }
+  .song-header { border-bottom-color: #ccc; }
+  input.title-field, input.artist-field, .field input, .estado-select,
+  select.type-select, input.tom-field {
+    background: transparent !important;
+    border: none !important;
+    color: #000 !important;
+    padding: 0;
+  }
+  input.title-field { font-size: 26px; }
+  .section-card { break-inside: avoid; page-break-inside: avoid; }
+  .section-body { box-shadow: none; border-color: #ccc; }
+  .spine-dot, .spine-line { background: #999; border-color: #fff; }
+  .section-fields { display: flex !important; }
+  textarea.print-hidden { display: none !important; }
+  .print-text {
+    display: block;
+    white-space: pre-wrap;
+    color: #000;
+  }
+  .print-text.cifra { font-family: 'Space Mono', monospace; font-size: 13px; }
+  .print-text.notas { font-family: 'Work Sans', sans-serif; font-size: 12px; color: #333; }
 }

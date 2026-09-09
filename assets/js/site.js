@@ -1,4 +1,9 @@
 const TIPOS = ["Intro", "Verso", "Pré-Refrão", "Refrão", "Break", "Solo", "Ponte", "Instrumental", "Outro"];
+const ESTADOS = {
+  composicao: "Em composição / projeto",
+  ensaio: "Em ensaio",
+  pronta: "Pronta a tocar",
+};
 const API = "api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
@@ -112,7 +117,7 @@ function renderSongList() {
     .map(
       (s) => `
     <a class="song-item ${s.id === currentSongId ? "active" : ""}" data-id="${s.id}" href="${songUrl(s.id)}">
-      <span class="t">${escapeHtml(s.title || "Sem título")}</span>
+      <span class="t"><span class="status-dot ${s.estado || "composicao"}" title="${ESTADOS[s.estado] || ESTADOS.composicao}"></span>${escapeHtml(s.title || "Sem título")}</span>
       <span class="meta">
         <span class="artist">${escapeHtml(s.artist || "")}</span>
         ${s.tom ? `<span class="tom-pill">${escapeHtml(s.tom)}</span>` : ""}
@@ -147,15 +152,25 @@ function renderMain() {
 
   const sections = [...(song.sections || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  const estado = song.estado || "composicao";
   main.innerHTML = `
     <div class="song-header">
       <div class="title-row">
         <input class="title-field" id="titleInput" placeholder="Título da música" value="${escapeHtml(song.title || "")}" />
+        <button class="print-btn" id="printBtn" title="Imprimir / PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
       </div>
       <input class="artist-field" id="artistInput" placeholder="Artista / autor" value="${escapeHtml(song.artist || "")}" />
       <div class="field-row">
         <div class="field"><label>Tom</label><input id="tomInput" placeholder="ex. Sol" value="${escapeHtml(song.tom || "")}" /></div>
         <div class="field"><label>BPM</label><input id="bpmInput" placeholder="ex. 96" inputmode="numeric" value="${escapeHtml(song.bpm || "")}" /></div>
+        <div class="field">
+          <label>Estado</label>
+          <select id="estadoInput" class="estado-select ${estado}">
+            ${Object.entries(ESTADOS).map(([v, label]) => `<option value="${v}" ${v === estado ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
+        </div>
       </div>
     </div>
     <div class="structure" id="structure">
@@ -218,6 +233,13 @@ function renderMain() {
     song.bpm = e.target.value;
     scheduleSave();
   });
+  document.getElementById("estadoInput").addEventListener("change", (e) => {
+    song.estado = e.target.value;
+    e.target.className = "estado-select " + e.target.value;
+    scheduleSave();
+    renderSongList();
+  });
+  document.getElementById("printBtn").addEventListener("click", () => window.print());
   document.getElementById("addSectionBtn").addEventListener("click", () => addSection(song));
 
   document.querySelectorAll("#structure .section-card").forEach((card, i, all) => {
@@ -280,7 +302,7 @@ function deleteSection(song, id) {
 function addNewSong() {
   const orders = state.songs.map((s) => s.order || 0);
   const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
-  const song = { id: uid(), title: "Nova música", artist: "", tom: "", bpm: "", order: nextOrder, sections: [] };
+  const song = { id: uid(), title: "Nova música", artist: "", tom: "", bpm: "", estado: "composicao", order: nextOrder, sections: [] };
   state.songs.push(song);
   currentSongId = song.id;
   setPathForSong(currentSongId);
@@ -300,6 +322,21 @@ function applyPath() {
   renderMain();
 }
 
+function showPrintText() {
+  document.querySelectorAll("#structure textarea").forEach((ta) => {
+    const div = document.createElement("div");
+    div.className = "print-text " + ta.className;
+    div.textContent = ta.value;
+    ta.insertAdjacentElement("afterend", div);
+    ta.classList.add("print-hidden");
+  });
+}
+
+function hidePrintText() {
+  document.querySelectorAll(".print-text").forEach((div) => div.remove());
+  document.querySelectorAll(".print-hidden").forEach((ta) => ta.classList.remove("print-hidden"));
+}
+
 async function init() {
   document.getElementById("newSongBtn").addEventListener("click", addNewSong);
   setSyncStatus("ok", "a carregar…");
@@ -309,6 +346,8 @@ async function init() {
   renderSongList();
   renderMain();
   window.addEventListener("popstate", applyPath);
+  window.addEventListener("beforeprint", showPrintText);
+  window.addEventListener("afterprint", hidePrintText);
   pollTimer = setInterval(pollForUpdates, POLL_MS);
   window.addEventListener("beforeunload", () => {
     if (dirty) {
