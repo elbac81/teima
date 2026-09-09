@@ -225,6 +225,9 @@ body {
 @media (max-width: 600px) {
   .main { padding: 24px 18px 60px; }
 }
+@media (min-width: 1000px) {
+  .main { max-width: 90vw; }
+}
 
 .empty-state {
   display: flex;
@@ -402,6 +405,17 @@ input.artist-field:focus { outline: none; color: var(--text); }
   margin-top: 4px;
 }
 .section-card:last-child .spine-line { display: none; }
+
+@media (min-width: 1000px) {
+  .structure {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+  .section-card { padding: 4px 0; }
+  .spine-line { display: none; }
+}
 
 .section-body {
   flex: 1;
