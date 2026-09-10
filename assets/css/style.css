@@ -619,11 +619,21 @@ input.title-field:focus { outline: none; }
 .letra-text {
   font-family: 'Space Mono', monospace;
   font-size: 13.5px;
-  line-height: 1.65;
+  line-height: 1.9;
   white-space: pre-wrap;
   word-break: break-word;
   margin: 0;
   color: var(--text);
+}
+.letra-text .chord-line {
+  display: inline-block;
+  color: var(--accent-2);
+  font-weight: 700;
+}
+.letra-text .lyric-line {
+  display: inline-block;
+  color: var(--text);
+  font-weight: 400;
 }
 
 /* ---- Structure spine ---- */
@@ -824,7 +834,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 @media print {
   .topbar, .print-btn, .add-section-btn, .back-link,
   .section-actions, .empty-state, .repertorio-picker,
-  #repDeleteBtn {
+  #repDeleteBtn, #letraDeleteBtn {
     display: none !important;
   }
   html, body { background: #fff; color: #000; }
@@ -853,4 +863,6 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   .letra-section-title { color: #333 !important; }
   .letra-section { background: transparent; border: none; box-shadow: none; border-bottom: 1px solid #ccc; border-radius: 0; break-inside: avoid; page-break-inside: avoid; }
   .letra-status-pill { display: none !important; }
+  .chord-line { color: #000 !important; font-weight: 700 !important; }
+  .lyric-line { color: #333 !important; font-weight: 400 !important; }
 }

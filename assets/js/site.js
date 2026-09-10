@@ -25,6 +25,30 @@ function escapeHtml(s) {
   return (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+const CHORD_TOKEN_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus[24]?|add)?[0-9]?(\/[A-G](#|b)?)?$/;
+
+function isChordLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  const tokens = trimmed.split(/\s+/);
+  return tokens.every((t) => CHORD_TOKEN_RE.test(t));
+}
+
+// Marca cada linha de uma cifra como acorde ou letra, para as poder
+// estilizar de forma diferente (acordes a negrito/cor) na vista de
+// leitura/impressão. Deteção por heurística: uma linha só "conta"
+// como acorde se TODAS as suas palavras parecerem nomes de acordes.
+function renderCifraHtml(text) {
+  return (text || "")
+    .split("\n")
+    .map((line) => {
+      const escaped = escapeHtml(line) || " ";
+      const cls = isChordLine(line) ? "chord-line" : "lyric-line";
+      return `<span class="${cls}">${escaped}</span>`;
+    })
+    .join("\n");
+}
+
 function currentSong() {
   return state.songs.find((s) => s.id === currentSongId) || null;
 }
@@ -531,6 +555,7 @@ function renderLetrasList(main) {
     </a>
     <div class="repertorios-head">
       <h2>Letras</h2>
+      <button class="new-song-btn page-btn" id="newLetraSongBtn">+ Nova música</button>
     </div>
     ${
       songs.length === 0
@@ -559,6 +584,7 @@ function renderLetrasList(main) {
     setPathForSong(null);
     renderMain();
   });
+  document.getElementById("newLetraSongBtn").addEventListener("click", addNewSong);
   main.querySelectorAll(".song-card").forEach((card) => {
     card.addEventListener("click", (e) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -586,22 +612,26 @@ function renderLetraDetail(main, song) {
           <option value="construcao" ${letraEstado === "construcao" ? "selected" : ""}>${LETRA_ESTADOS.construcao}</option>
           <option value="finalizada" ${letraEstado === "finalizada" ? "selected" : ""}>${LETRA_ESTADOS.finalizada}</option>
         </select>
+        <a class="print-btn" id="letraEditBtn" href="${songUrl(song.id)}" title="Editar (acordes, secções…)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        </a>
         <button class="print-btn" id="letraPrintBtn" title="Imprimir / PDF">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         </button>
+        <button class="mini-btn del" id="letraDeleteBtn" title="Eliminar música">✕</button>
       </div>
       ${song.tom ? `<div class="letra-tom">Tom: ${escapeHtml(song.tom)}</div>` : ""}
     </div>
     <div class="letra-body" id="letraBody">
       ${
         sections.length === 0
-          ? '<p class="no-sections">Esta música ainda não tem secções.</p>'
+          ? '<p class="no-sections">Esta música ainda não tem secções. <a href="' + songUrl(song.id) + '">Adiciona-as na edição.</a></p>'
           : sections
               .map(
                 (sec) => `
         <div class="letra-section">
           <h3 class="letra-section-title">${escapeHtml(sec.tipo || "")}${sec.tom ? ` <span class="letra-section-tom">(${escapeHtml(sec.tom)})</span>` : ""}</h3>
-          <pre class="letra-text">${escapeHtml(sec.cifra || "")}</pre>
+          <pre class="letra-text">${renderCifraHtml(sec.cifra || "")}</pre>
         </div>`
               )
               .join("")
@@ -622,6 +652,27 @@ function renderLetraDetail(main, song) {
     scheduleSave();
   });
   document.getElementById("letraPrintBtn").addEventListener("click", () => window.print());
+  document.getElementById("letraEditBtn").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentSongId = song.id;
+    view = "song";
+    setPathForSong(song.id);
+    renderMain();
+  });
+  document.getElementById("letraDeleteBtn").addEventListener("click", () => {
+    if (!confirm(`Eliminar "${song.title || "esta música"}"? Isto remove a música e todas as suas secções.`)) return;
+    deleteSong(song.id);
+    currentSongId = null;
+    view = "letras";
+    setPathForLetrasList();
+    renderMain();
+  });
+}
+
+function deleteSong(id) {
+  state.songs = state.songs.filter((s) => s.id !== id);
+  saveState();
 }
 
 function renderMain() {
@@ -886,7 +937,11 @@ function showPrintText() {
   document.querySelectorAll("#structure textarea").forEach((ta) => {
     const div = document.createElement("div");
     div.className = "print-text " + ta.className;
-    div.textContent = ta.value;
+    if (ta.classList.contains("cifra")) {
+      div.innerHTML = renderCifraHtml(ta.value);
+    } else {
+      div.textContent = ta.value;
+    }
     ta.insertAdjacentElement("afterend", div);
     ta.classList.add("print-hidden");
   });
