@@ -586,8 +586,10 @@ function renderMain() {
             </div>
             <div class="section-fields">
               <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
-              <label class="field-label">Notas</label>
+              <label class="field-label">Notas gerais <span class="notas-visibility">— vê toda a gente</span></label>
               <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+              <label class="field-label">Notas para mim ${currentUser ? `<span class="notas-visibility">— só ${escapeHtml(currentUser)} vê isto</span>` : ""}</label>
+              <textarea class="notas" data-field="notaPropria" rows="1" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
             </div>
           </div>
         </div>`;
@@ -643,6 +645,10 @@ function renderMain() {
     });
     card.querySelector('[data-field="notas"]').addEventListener("input", (e) => {
       sec.notas = e.target.value;
+      scheduleSave();
+    });
+    card.querySelector('[data-field="notaPropria"]').addEventListener("input", (e) => {
+      sec.notaPropria = e.target.value;
       scheduleSave();
     });
     card.querySelector(".up").addEventListener("click", () => moveSection(song, i, -1, sections));
