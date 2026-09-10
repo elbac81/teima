@@ -99,7 +99,7 @@ a { color: inherit; }
   .nav-toggle { display: block; }
 }
 
-a.ensaios-link,
+a.privado-link,
 a.icon-btn {
   display: flex;
   align-items: center;
@@ -113,12 +113,12 @@ a.icon-btn {
   text-decoration: none;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-a.ensaios-link:hover,
+a.privado-link:hover,
 a.icon-btn:hover {
   border-color: var(--gold);
   background: rgba(232, 195, 74, 0.08);
 }
-a.ensaios-link svg,
+a.privado-link svg,
 a.icon-btn svg { width: 16px; height: 16px; }
 
 .social-row {

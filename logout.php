@@ -2,7 +2,7 @@
 // HTTP Basic Auth não tem "logout" verdadeiro — o truque é responder
 // sempre com 401 nesta página, o que faz o browser esquecer as
 // credenciais guardadas para este realm. Depois o utilizador só
-// precisa de voltar a /ensaios/ para lhe ser pedido login de novo.
+// precisa de voltar a /privado/ para lhe ser pedido login de novo.
 header('WWW-Authenticate: Basic realm="Teima — notas de ensaio"');
 header('HTTP/1.0 401 Unauthorized');
 header('Content-Type: text/html; charset=utf-8');
@@ -32,6 +32,6 @@ header('Content-Type: text/html; charset=utf-8');
   </style>
 </head>
 <body>
-  <p>Sessão terminada.<br><a href="/ensaios/">Entrar novamente</a></p>
+  <p>Sessão terminada.<br><a href="/privado/">Entrar novamente</a></p>
 </body>
 </html>

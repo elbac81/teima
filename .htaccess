@@ -4,11 +4,11 @@
 
 AuthType Basic
 AuthName "Teima — notas de ensaio"
-AuthUserFile /home/u759784315/domains/teima.space/public_html/ensaios/.htpasswd
+AuthUserFile /home/u759784315/domains/teima.space/public_html/privado/.htpasswd
 Require valid-user
 
 RewriteEngine On
-RewriteBase /ensaios/
+RewriteBase /privado/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]

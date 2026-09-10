@@ -16,14 +16,14 @@ jobs:
           sed -i "s/__BUILD__/${{ github.sha }}/g" index.html
           grep -rl '__BUILD__' root-page/ | xargs -r sed -i "s/__BUILD__/${{ github.sha }}/g"
 
-      - name: Upload via FTP (ensaios)
+      - name: Upload via FTP (privado)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ensaios/
-          state-name: .ftp-deploy-sync-state-ensaios.json
+          server-dir: privado/
+          state-name: .ftp-deploy-sync-state-privado.json
           exclude: |
             **/.git*
             **/.git*/**

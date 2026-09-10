@@ -4,7 +4,7 @@ const ESTADOS = {
   ensaio: "Em ensaio",
   pronta: "Pronta a tocar",
 };
-const API = "/ensaios/api.php";
+const API = "/privado/api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
 
@@ -58,13 +58,13 @@ function currentRepertorio() {
   return state.repertorios.find((r) => r.id === currentRepertorioId) || null;
 }
 
-const SONG_PATH_PREFIX = "/ensaios/musica/";
-const REPERTORIO_PATH_PREFIX = "/ensaios/repertorio/";
-const REPERTORIOS_LIST_PATH = "/ensaios/repertorios";
-const EVENTOS_LIST_PATH = "/ensaios/eventos";
-const NOTAS_PATH = "/ensaios/notas";
-const LETRA_PATH_PREFIX = "/ensaios/letra/";
-const LETRAS_LIST_PATH = "/ensaios/letras";
+const SONG_PATH_PREFIX = "/privado/musica/";
+const REPERTORIO_PATH_PREFIX = "/privado/repertorio/";
+const REPERTORIOS_LIST_PATH = "/privado/repertorios";
+const EVENTOS_LIST_PATH = "/privado/eventos";
+const NOTAS_PATH = "/privado/notas";
+const LETRA_PATH_PREFIX = "/privado/letra/";
+const LETRAS_LIST_PATH = "/privado/letras";
 const LETRA_ESTADOS = {
   construcao: "Em construção",
   finalizada: "Finalizada",
@@ -134,7 +134,7 @@ function setPathForLetrasList() {
 }
 
 function setPathForSong(id) {
-  const target = id ? songUrl(id) : "/ensaios/";
+  const target = id ? songUrl(id) : "/privado/";
   if (location.pathname !== target) history.pushState(null, "", target);
 }
 
@@ -252,7 +252,7 @@ function renderHomeGrid() {
 function renderRepertoriosList(main) {
   const reps = [...state.repertorios].sort((a, b) => (b.data || "").localeCompare(a.data || "") || (a.order || 0) - (b.order || 0));
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
+    <a class="back-link" href="/privado/" id="backLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       Todas as músicas
     </a>
@@ -438,7 +438,7 @@ function addNewRepertorio() {
 function renderEventosList(main) {
   const eventos = [...state.eventos].sort((a, b) => (a.data || "9999-99-99").localeCompare(b.data || "9999-99-99"));
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
+    <a class="back-link" href="/privado/" id="backLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       Todas as músicas
     </a>
@@ -514,7 +514,7 @@ function addNewEvento() {
 
 function renderNotasView(main) {
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
+    <a class="back-link" href="/privado/" id="backLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       Todas as músicas
     </a>
@@ -550,7 +550,7 @@ function renderNotasView(main) {
 function renderLetrasList(main) {
   const songs = [...state.songs].sort((a, b) => (a.order || 0) - (b.order || 0));
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
+    <a class="back-link" href="/privado/" id="backLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       Todas as músicas
     </a>
@@ -735,7 +735,7 @@ function renderMain() {
 
   const estado = song.estado || "composicao";
   main.innerHTML = `
-    <a class="back-link" href="/ensaios/" id="backLink">
+    <a class="back-link" href="/privado/" id="backLink">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       Todas as músicas
     </a>

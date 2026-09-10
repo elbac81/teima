@@ -1,12 +1,12 @@
 <?php
 // Endpoint público e só de leitura para o calendário de concertos da
 // homepage. Lê diretamente o mesmo ficheiro de armazenamento das Notas
-// de Ensaio (ensaios/dados/musicas.json) mas devolve só os eventos —
+// de Ensaio (privado/dados/musicas.json) mas devolve só os eventos —
 // nunca músicas ou repertórios. As escritas só acontecem através de
-// /ensaios/api.php, que fica protegido por password.
+// /privado/api.php, que fica protegido por password.
 header('Content-Type: application/json; charset=utf-8');
 
-$file = __DIR__ . '/ensaios/dados/musicas.json';
+$file = __DIR__ . '/privado/dados/musicas.json';
 
 if (!file_exists($file)) {
     echo json_encode(['eventos' => []]);
