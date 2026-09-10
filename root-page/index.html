@@ -21,7 +21,7 @@
       justify-content: center;
       gap: 36px;
       min-height: 100vh;
-      padding: 24px;
+      padding: 100px 24px 40px;
       position: relative;
     }
     .logo {
@@ -30,14 +30,12 @@
       height: auto;
       display: block;
     }
-    @media (max-width: 600px) {
-      .logo { transform: translateY(-7vh); }
-    }
 
     .events-section {
+      width: 100%;
       max-width: 620px;
       margin: 0 auto;
-      padding: 60px 24px 100px;
+      padding: 0 24px 60px;
     }
     .events-section h2 {
       font-size: 12px;
@@ -124,6 +122,13 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
       </a>
     </div>
+
+    <section class="events-section">
+      <h2>Próximos concertos</h2>
+      <div class="events-list" id="eventsList">
+        <p class="events-empty">A carregar…</p>
+      </div>
+    </section>
   </div>
 
   <div class="topbar-actions">
@@ -151,13 +156,6 @@
       </svg>
     </a>
   </div>
-
-  <section class="events-section">
-    <h2>Próximos concertos</h2>
-    <div class="events-list" id="eventsList">
-      <p class="events-empty">A carregar…</p>
-    </div>
-  </section>
 
   <script>
     (function () {
