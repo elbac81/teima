@@ -522,11 +522,11 @@ function renderNotasView(main) {
       <h2>Notas</h2>
     </div>
     <div class="notas-block">
-      <label class="field-label">Notas gerais <span class="notas-visibility">— vê toda a gente</span></label>
+      <label class="field-label">Notas gerais</label>
       <textarea class="notas-textarea" id="notasGeraisInput" rows="6" placeholder="Notas partilhadas por toda a banda (avisos, ideias, recados de ensaio…)">${escapeHtml(state.notasGerais || "")}</textarea>
     </div>
     <div class="notas-block">
-      <label class="field-label">As minhas notas ${currentUser ? `<span class="notas-visibility">— só ${escapeHtml(currentUser)} vê isto</span>` : ""}</label>
+      <label class="field-label">As minhas notas</label>
       <textarea class="notas-textarea" id="notaPropriaInput" rows="6" placeholder="Notas privadas, só tu vês (mesmo que outros usem a mesma password).">${escapeHtml(state.notaPropria || "")}</textarea>
     </div>
   `;
@@ -784,9 +784,9 @@ function renderMain() {
             </div>
             <div class="section-fields">
               <textarea class="cifra" data-field="cifra" rows="8" draggable="false" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
-              <label class="field-label">Notas gerais <span class="notas-visibility">— vê toda a gente</span></label>
+              <label class="field-label">Notas gerais</label>
               <textarea class="notas" data-field="notas" rows="1" draggable="false" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
-              <label class="field-label">Notas para mim ${currentUser ? `<span class="notas-visibility">— só ${escapeHtml(currentUser)} vê isto</span>` : ""}</label>
+              <label class="field-label">Notas para mim</label>
               <textarea class="notas" data-field="notaPropria" rows="1" draggable="false" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
             </div>
           </div>

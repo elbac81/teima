@@ -349,11 +349,6 @@ body {
   color: var(--text-dim);
   margin-bottom: 8px;
 }
-.notas-visibility {
-  text-transform: none;
-  letter-spacing: normal;
-  opacity: 0.8;
-}
 .notas-textarea {
   font-family: 'Work Sans', sans-serif;
   font-size: 14px;
