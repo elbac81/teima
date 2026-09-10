@@ -428,6 +428,13 @@ function addNewRepertorio() {
   const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
   const rep = { id: uid(), nome: "Novo repertório", data: "", local: "", order: nextOrder, musicas: [] };
   state.repertorios.push(rep);
+
+  if (confirm("Criar também um evento para este repertório?")) {
+    const evento = { id: uid(), titulo: "", data: "", hora: "", local: "", link: "", repertorioId: rep.id };
+    rep.eventoId = evento.id;
+    state.eventos.push(evento);
+  }
+
   currentRepertorioId = rep.id;
   view = "repertorio";
   setPathForRepertorio(rep.id);
@@ -508,6 +515,15 @@ function renderEventosList(main) {
 function addNewEvento() {
   const evento = { id: uid(), titulo: "", data: "", hora: "", local: "", link: "" };
   state.eventos.push(evento);
+
+  if (confirm("Criar também um repertório para este evento?")) {
+    const orders = state.repertorios.map((r) => r.order || 0);
+    const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
+    const rep = { id: uid(), nome: "Novo repertório", data: "", local: "", order: nextOrder, musicas: [], eventoId: evento.id };
+    evento.repertorioId = rep.id;
+    state.repertorios.push(rep);
+  }
+
   saveState();
   renderMain();
 }
