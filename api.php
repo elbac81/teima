@@ -16,6 +16,17 @@ if (!is_dir($dataDir)) {
     mkdir($dataDir, 0755, true);
 }
 
+// Migração pontual: a rota mudou de /ensaios/ para /privado/, uma pasta nova
+// no servidor — e o deploy nunca mexe em dados/musicas.json (é dados a
+// sério, não código), por isso os dados ficaram para trás na pasta antiga.
+// Se ainda não há ficheiro aqui mas há um em ../ensaios/dados/musicas.json,
+// copia-se uma única vez; depois disso o ficheiro daqui já existe e este
+// bloco nunca mais mexe.
+$legacyFile = __DIR__ . '/../ensaios/dados/musicas.json';
+if (!file_exists($file) && file_exists($legacyFile)) {
+    copy($legacyFile, $file);
+}
+
 function currentUser() {
     if (!empty($_SERVER['PHP_AUTH_USER'])) {
         return $_SERVER['PHP_AUTH_USER'];
