@@ -13,6 +13,9 @@ jobs:
       - run: node shot.js
       - name: dump base64
         run: |
-          echo FULL_START
-          base64 -w0 root-full.png
-          echo FULL_END
+          echo TOP_START
+          base64 -w0 root-top.png
+          echo TOP_END
+          echo SCROLLED_START
+          base64 -w0 root-scrolled.png
+          echo SCROLLED_END
