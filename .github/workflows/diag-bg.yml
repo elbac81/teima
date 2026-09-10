@@ -1,0 +1,16 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check old and new paths
+        run: |
+          set +e
+          echo "--- /privado/ (new) ---"
+          curl -s -o /dev/null -w '%{http_code}\n' --max-time 20 -u teima:fareja "https://teima.space/privado/"
+          echo "--- /ensaios/ (old) ---"
+          curl -s -o /dev/null -w '%{http_code}\n' --max-time 20 -u teima:fareja "https://teima.space/ensaios/"
+          echo "--- /ensaios/api.php (old) ---"
+          curl -s -o /dev/null -w '%{http_code}\n' --max-time 20 -u teima:fareja "https://teima.space/ensaios/api.php"
+          exit 0
