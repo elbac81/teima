@@ -1,0 +1,14 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check css cache-busted vs bare
+        run: |
+          echo "---BARE---"
+          curl -s --max-time 20 "https://teima.space/site.css" | grep -A5 "social-row"
+          echo "---BUSTED---"
+          curl -s --max-time 20 "https://teima.space/site.css?x=$(date +%s)" | grep -A5 "social-row"
+          echo "---HTML---"
+          curl -s --max-time 20 "https://teima.space/?x=$(date +%s)" | grep -i "site.css"
