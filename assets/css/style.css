@@ -229,6 +229,20 @@ body {
   color: var(--accent-2);
   flex-shrink: 0;
 }
+.letra-status-pill {
+  font-family: 'Space Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 20px;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  flex-shrink: 0;
+}
+.letra-status-pill.finalizada {
+  color: #5fb87a;
+  background: color-mix(in srgb, #5fb87a 15%, transparent);
+}
 
 .repertorios-head {
   display: flex;
@@ -547,6 +561,70 @@ input.title-field:focus { outline: none; }
 .estado-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .estado-select.ensaio { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, transparent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .estado-select.pronta { color: #5fb87a; border-color: color-mix(in srgb, #5fb87a 40%, transparent); background: color-mix(in srgb, #5fb87a 12%, transparent); }
+.estado-select.finalizada { color: #5fb87a; border-color: color-mix(in srgb, #5fb87a 40%, transparent); background: color-mix(in srgb, #5fb87a 12%, transparent); }
+
+/* ---- Letras (read-only, print-friendly view of existing cifra text) ---- */
+.letra-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.letra-header .title-row { align-items: center; }
+.letra-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+  flex: 1;
+  min-width: 180px;
+  color: var(--page-text);
+}
+.letra-tom {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--page-text-dim);
+}
+.letra-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (min-width: 1000px) {
+  .letra-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+}
+.letra-section {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+}
+.letra-section-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+.letra-section-tom {
+  color: var(--accent-2);
+  text-transform: none;
+  font-weight: 600;
+}
+.letra-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 13.5px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  color: var(--text);
+}
 
 /* ---- Structure spine ---- */
 .structure {
@@ -771,4 +849,8 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
   }
   .print-text.cifra { font-family: 'Space Mono', monospace; font-size: 13px; }
   .print-text.notas { font-family: 'Work Sans', sans-serif; font-size: 12px; color: #333; }
+  .letra-title, .letra-tom, .letra-section-title, .letra-text { color: #000 !important; }
+  .letra-section-title { color: #333 !important; }
+  .letra-section { background: transparent; border: none; box-shadow: none; border-bottom: 1px solid #ccc; border-radius: 0; break-inside: avoid; page-break-inside: avoid; }
+  .letra-status-pill { display: none !important; }
 }

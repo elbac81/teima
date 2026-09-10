@@ -38,6 +38,12 @@ const REPERTORIO_PATH_PREFIX = "/ensaios/repertorio/";
 const REPERTORIOS_LIST_PATH = "/ensaios/repertorios";
 const EVENTOS_LIST_PATH = "/ensaios/eventos";
 const NOTAS_PATH = "/ensaios/notas";
+const LETRA_PATH_PREFIX = "/ensaios/letra/";
+const LETRAS_LIST_PATH = "/ensaios/letras";
+const LETRA_ESTADOS = {
+  construcao: "Em construção",
+  finalizada: "Finalizada",
+};
 
 function songUrl(id) {
   return SONG_PATH_PREFIX + encodeURIComponent(id);
@@ -45,6 +51,10 @@ function songUrl(id) {
 
 function repertorioUrl(id) {
   return REPERTORIO_PATH_PREFIX + encodeURIComponent(id);
+}
+
+function letraUrl(id) {
+  return LETRA_PATH_PREFIX + encodeURIComponent(id);
 }
 
 function songIdFromPath() {
@@ -77,6 +87,25 @@ function isNotasPath() {
 
 function setPathForNotas() {
   if (location.pathname !== NOTAS_PATH) history.pushState(null, "", NOTAS_PATH);
+}
+
+function letraIdFromPath() {
+  if (!location.pathname.startsWith(LETRA_PATH_PREFIX)) return null;
+  const id = location.pathname.slice(LETRA_PATH_PREFIX.length).replace(/\/$/, "");
+  return id ? decodeURIComponent(id) : null;
+}
+
+function isLetrasListPath() {
+  return location.pathname.replace(/\/$/, "") === LETRAS_LIST_PATH;
+}
+
+function setPathForLetra(id) {
+  const target = id ? letraUrl(id) : LETRAS_LIST_PATH;
+  if (location.pathname !== target) history.pushState(null, "", target);
+}
+
+function setPathForLetrasList() {
+  if (location.pathname !== LETRAS_LIST_PATH) history.pushState(null, "", LETRAS_LIST_PATH);
 }
 
 function setPathForSong(id) {
@@ -493,8 +522,124 @@ function renderNotasView(main) {
   });
 }
 
+function renderLetrasList(main) {
+  const songs = [...state.songs].sort((a, b) => (a.order || 0) - (b.order || 0));
+  main.innerHTML = `
+    <a class="back-link" href="/ensaios/" id="backLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Todas as músicas
+    </a>
+    <div class="repertorios-head">
+      <h2>Letras</h2>
+    </div>
+    ${
+      songs.length === 0
+        ? '<div class="no-sections">Ainda sem músicas.</div>'
+        : `<div class="song-grid">
+          ${songs
+            .map(
+              (s) => `
+          <a class="song-card" data-id="${s.id}" href="${letraUrl(s.id)}">
+            <span class="t">${escapeHtml(s.title || "Sem título")}</span>
+            <span class="meta">
+              <span class="letra-status-pill ${s.letraEstado === "finalizada" ? "finalizada" : ""}">${LETRA_ESTADOS[s.letraEstado] || LETRA_ESTADOS.construcao}</span>
+              ${s.tom ? `<span class="tom-pill">${escapeHtml(s.tom)}</span>` : ""}
+            </span>
+          </a>`
+            )
+            .join("")}
+        </div>`
+    }
+  `;
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentSongId = null;
+    view = "home";
+    setPathForSong(null);
+    renderMain();
+  });
+  main.querySelectorAll(".song-card").forEach((card) => {
+    card.addEventListener("click", (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      currentSongId = card.dataset.id;
+      view = "letra";
+      setPathForLetra(currentSongId);
+      renderMain();
+    });
+  });
+}
+
+function renderLetraDetail(main, song) {
+  const sections = [...(song.sections || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const letraEstado = song.letraEstado === "finalizada" ? "finalizada" : "construcao";
+  main.innerHTML = `
+    <a class="back-link" href="${LETRAS_LIST_PATH}" id="backToLetras">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Letras
+    </a>
+    <div class="letra-header">
+      <div class="title-row">
+        <h1 class="letra-title">${escapeHtml(song.title || "Sem título")}</h1>
+        <select id="letraEstadoInput" class="estado-select ${letraEstado === "finalizada" ? "finalizada" : ""}">
+          <option value="construcao" ${letraEstado === "construcao" ? "selected" : ""}>${LETRA_ESTADOS.construcao}</option>
+          <option value="finalizada" ${letraEstado === "finalizada" ? "selected" : ""}>${LETRA_ESTADOS.finalizada}</option>
+        </select>
+        <button class="print-btn" id="letraPrintBtn" title="Imprimir / PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </button>
+      </div>
+      ${song.tom ? `<div class="letra-tom">Tom: ${escapeHtml(song.tom)}</div>` : ""}
+    </div>
+    <div class="letra-body" id="letraBody">
+      ${
+        sections.length === 0
+          ? '<p class="no-sections">Esta música ainda não tem secções.</p>'
+          : sections
+              .map(
+                (sec) => `
+        <div class="letra-section">
+          <h3 class="letra-section-title">${escapeHtml(sec.tipo || "")}${sec.tom ? ` <span class="letra-section-tom">(${escapeHtml(sec.tom)})</span>` : ""}</h3>
+          <pre class="letra-text">${escapeHtml(sec.cifra || "")}</pre>
+        </div>`
+              )
+              .join("")
+      }
+    </div>
+  `;
+  document.getElementById("backToLetras").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    currentSongId = null;
+    view = "letras";
+    setPathForLetrasList();
+    renderMain();
+  });
+  document.getElementById("letraEstadoInput").addEventListener("change", (e) => {
+    song.letraEstado = e.target.value;
+    e.target.className = "estado-select " + (e.target.value === "finalizada" ? "finalizada" : "");
+    scheduleSave();
+  });
+  document.getElementById("letraPrintBtn").addEventListener("click", () => window.print());
+}
+
 function renderMain() {
   const main = document.getElementById("main");
+  if (view === "letras") {
+    renderLetrasList(main);
+    return;
+  }
+  if (view === "letra") {
+    const song = currentSong();
+    if (song) {
+      renderLetraDetail(main, song);
+      return;
+    }
+    view = "letras";
+    renderLetrasList(main);
+    return;
+  }
   if (view === "notas") {
     renderNotasView(main);
     return;
@@ -700,10 +845,19 @@ function addNewSong() {
 function applyPath() {
   const songId = songIdFromPath();
   const repId = repertorioIdFromPath();
+  const letraId = letraIdFromPath();
   if (songId && state.songs.find((s) => s.id === songId)) {
     currentSongId = songId;
     currentRepertorioId = null;
     view = "song";
+  } else if (letraId && state.songs.find((s) => s.id === letraId)) {
+    currentSongId = letraId;
+    currentRepertorioId = null;
+    view = "letra";
+  } else if (isLetrasListPath() || letraId) {
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "letras";
   } else if (repId && state.repertorios.find((r) => r.id === repId)) {
     currentRepertorioId = repId;
     currentSongId = null;
@@ -756,6 +910,17 @@ async function init() {
     currentRepertorioId = null;
     view = "home";
     setPathForSong(null);
+    renderMain();
+  });
+  document.getElementById("letrasLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const menu = document.getElementById("menuToggle");
+    if (menu) menu.open = false;
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "letras";
+    setPathForLetrasList();
     renderMain();
   });
   document.getElementById("repertoriosLink").addEventListener("click", (e) => {
