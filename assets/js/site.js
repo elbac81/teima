@@ -16,6 +16,7 @@ let view = "home";
 let saveTimer = null;
 let pollTimer = null;
 let dirty = false;
+let dragSectionId = null;
 
 function uid() {
   return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -763,17 +764,18 @@ function renderMain() {
           : sections
               .map((sec) => {
                 return `
-        <div class="section-card" data-id="${sec.id}">
+        <div class="section-card" data-id="${sec.id}" draggable="true">
           <div class="spine-col">
             <div class="spine-dot"></div>
             <div class="spine-line"></div>
           </div>
           <div class="section-body">
             <div class="section-top">
-              <select class="type-select" data-field="tipo">
+              <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
+              <select class="type-select" data-field="tipo" draggable="false">
                 ${TIPOS.map((t) => `<option value="${t}" ${t === sec.tipo ? "selected" : ""}>${t}</option>`).join("")}
               </select>
-              <input class="tom-field" data-field="tom" placeholder="tom" value="${escapeHtml(sec.tom || "")}" />
+              <input class="tom-field" data-field="tom" placeholder="tom" draggable="false" value="${escapeHtml(sec.tom || "")}" />
               <div class="section-actions">
                 <button class="mini-btn up" title="Mover para cima">↑</button>
                 <button class="mini-btn down" title="Mover para baixo">↓</button>
@@ -781,11 +783,11 @@ function renderMain() {
               </div>
             </div>
             <div class="section-fields">
-              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
+              <textarea class="cifra" data-field="cifra" rows="8" draggable="false" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
               <label class="field-label">Notas gerais <span class="notas-visibility">— vê toda a gente</span></label>
-              <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+              <textarea class="notas" data-field="notas" rows="1" draggable="false" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
               <label class="field-label">Notas para mim ${currentUser ? `<span class="notas-visibility">— só ${escapeHtml(currentUser)} vê isto</span>` : ""}</label>
-              <textarea class="notas" data-field="notaPropria" rows="1" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
+              <textarea class="notas" data-field="notaPropria" rows="1" draggable="false" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
             </div>
           </div>
         </div>`;
@@ -850,6 +852,40 @@ function renderMain() {
     card.querySelector(".up").addEventListener("click", () => moveSection(song, i, -1, sections));
     card.querySelector(".down").addEventListener("click", () => moveSection(song, i, 1, sections));
     card.querySelector(".del").addEventListener("click", () => deleteSection(song, secId));
+
+    card.addEventListener("dragstart", () => {
+      dragSectionId = secId;
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      document.querySelectorAll("#structure .section-card.drag-over").forEach((el) => el.classList.remove("drag-over"));
+      dragSectionId = null;
+    });
+    card.addEventListener("dragover", (e) => {
+      if (!dragSectionId || dragSectionId === secId) return;
+      e.preventDefault();
+      card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("drag-over");
+    });
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      const draggedId = dragSectionId;
+      if (!draggedId || draggedId === secId) return;
+      const fromIndex = sections.findIndex((s) => s.id === draggedId);
+      const toIndex = sections.findIndex((s) => s.id === secId);
+      if (fromIndex === -1 || toIndex === -1) return;
+      const [moved] = sections.splice(fromIndex, 1);
+      sections.splice(toIndex, 0, moved);
+      sections.forEach((s, idx) => {
+        s.order = idx;
+      });
+      saveState();
+      renderMain();
+    });
   });
 }
 

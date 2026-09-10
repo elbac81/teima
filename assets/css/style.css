@@ -656,6 +656,8 @@ input.title-field:focus { outline: none; }
   margin-bottom: 16px;
 }
 .section-card:last-child { margin-bottom: 0; }
+.section-card.dragging { opacity: 0.4; }
+.section-card.drag-over { outline: 2px dashed var(--accent); outline-offset: 2px; }
 .spine-col {
   display: flex;
   flex-direction: column;
@@ -705,6 +707,15 @@ input.title-field:focus { outline: none; }
   gap: 10px;
   flex-wrap: wrap;
 }
+.drag-handle {
+  cursor: grab;
+  color: var(--text-dim);
+  font-size: 16px;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+}
+.drag-handle:active { cursor: grabbing; }
 select.type-select {
   font-family: 'Space Mono', monospace;
   font-size: 12px;
@@ -834,7 +845,7 @@ textarea.notas::placeholder, textarea.cifra::placeholder { color: var(--text-dim
 @media print {
   .topbar, .print-btn, .add-section-btn, .back-link,
   .section-actions, .empty-state, .repertorio-picker,
-  #repDeleteBtn, #letraDeleteBtn {
+  .drag-handle, #repDeleteBtn, #letraDeleteBtn {
     display: none !important;
   }
   html, body { background: #fff; color: #000; }
