@@ -1,6 +1,11 @@
 <?php
 // API mínima para as Notas de Ensaio da Teima: guarda tudo num único
 // ficheiro JSON (dados/musicas.json), como nos outros sites da banda.
+//
+// notasUtilizador guarda as notas privadas de cada utilizador (a chave
+// é o nome de login do Basic Auth) mas NUNCA é devolvido inteiro ao
+// cliente — só a nota do próprio utilizador (campo notaPropria), para
+// que cada um só veja o que escreveu.
 header('Content-Type: application/json; charset=utf-8');
 
 $dataDir = __DIR__ . '/dados';
@@ -10,19 +15,45 @@ if (!is_dir($dataDir)) {
     mkdir($dataDir, 0755, true);
 }
 
+function currentUser() {
+    if (!empty($_SERVER['PHP_AUTH_USER'])) {
+        return $_SERVER['PHP_AUTH_USER'];
+    }
+    $header = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+    if ($header && stripos($header, 'Basic ') === 0) {
+        $decoded = base64_decode(substr($header, 6));
+        if ($decoded !== false && strpos($decoded, ':') !== false) {
+            return explode(':', $decoded, 2)[0];
+        }
+    }
+    return null;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
+$user = currentUser();
 
 if ($method === 'GET') {
-    if (!file_exists($file)) {
-        echo json_encode(['songs' => []]);
-        exit;
+    $data = ['songs' => []];
+    if (file_exists($file)) {
+        $fp = fopen($file, 'r');
+        flock($fp, LOCK_SH);
+        $contents = stream_get_contents($fp);
+        flock($fp, LOCK_UN);
+        fclose($fp);
+        $decoded = json_decode($contents, true);
+        if (is_array($decoded)) {
+            $data = $decoded;
+        }
     }
-    $fp = fopen($file, 'r');
-    flock($fp, LOCK_SH);
-    $contents = stream_get_contents($fp);
-    flock($fp, LOCK_UN);
-    fclose($fp);
-    echo $contents !== false && $contents !== '' ? $contents : json_encode(['songs' => []]);
+    $notasUtilizador = is_array($data['notasUtilizador'] ?? null) ? $data['notasUtilizador'] : [];
+    echo json_encode([
+        'songs' => $data['songs'] ?? [],
+        'repertorios' => $data['repertorios'] ?? [],
+        'eventos' => $data['eventos'] ?? [],
+        'notasGerais' => is_string($data['notasGerais'] ?? null) ? $data['notasGerais'] : '',
+        'notaPropria' => ($user && isset($notasUtilizador[$user]) && is_string($notasUtilizador[$user])) ? $notasUtilizador[$user] : '',
+        'user' => $user,
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -53,9 +84,27 @@ if ($method === 'POST') {
         exit;
     }
     flock($fp, LOCK_EX);
+    $existingRaw = stream_get_contents($fp);
+    $existing = json_decode($existingRaw, true);
+    if (!is_array($existing)) {
+        $existing = [];
+    }
+    $notasUtilizador = is_array($existing['notasUtilizador'] ?? null) ? $existing['notasUtilizador'] : [];
+    if ($user && array_key_exists('notaPropria', $decoded) && is_string($decoded['notaPropria'])) {
+        $notasUtilizador[$user] = $decoded['notaPropria'];
+    }
+
+    $toWrite = [
+        'songs' => $decoded['songs'],
+        'repertorios' => $decoded['repertorios'] ?? ($existing['repertorios'] ?? []),
+        'eventos' => $decoded['eventos'] ?? ($existing['eventos'] ?? []),
+        'notasGerais' => is_string($decoded['notasGerais'] ?? null) ? $decoded['notasGerais'] : ($existing['notasGerais'] ?? ''),
+        'notasUtilizador' => $notasUtilizador,
+    ];
+
     ftruncate($fp, 0);
     rewind($fp);
-    fwrite($fp, json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    fwrite($fp, json_encode($toWrite, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     fflush($fp);
     flock($fp, LOCK_UN);
     fclose($fp);

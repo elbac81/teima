@@ -8,7 +8,8 @@ const API = "/ensaios/api.php";
 const POLL_MS = 8000;
 const SAVE_DEBOUNCE_MS = 600;
 
-let state = { songs: [], repertorios: [], eventos: [] };
+let state = { songs: [], repertorios: [], eventos: [], notasGerais: "", notaPropria: "" };
+let currentUser = null;
 let currentSongId = null;
 let currentRepertorioId = null;
 let view = "home";
@@ -36,6 +37,7 @@ const SONG_PATH_PREFIX = "/ensaios/musica/";
 const REPERTORIO_PATH_PREFIX = "/ensaios/repertorio/";
 const REPERTORIOS_LIST_PATH = "/ensaios/repertorios";
 const EVENTOS_LIST_PATH = "/ensaios/eventos";
+const NOTAS_PATH = "/ensaios/notas";
 
 function songUrl(id) {
   return SONG_PATH_PREFIX + encodeURIComponent(id);
@@ -67,6 +69,14 @@ function isEventosListPath() {
 
 function setPathForEventosList() {
   if (location.pathname !== EVENTOS_LIST_PATH) history.pushState(null, "", EVENTOS_LIST_PATH);
+}
+
+function isNotasPath() {
+  return location.pathname.replace(/\/$/, "") === NOTAS_PATH;
+}
+
+function setPathForNotas() {
+  if (location.pathname !== NOTAS_PATH) history.pushState(null, "", NOTAS_PATH);
 }
 
 function setPathForSong(id) {
@@ -104,6 +114,9 @@ async function loadState({ silent } = {}) {
     state = data && Array.isArray(data.songs) ? data : { songs: [] };
     if (!Array.isArray(state.repertorios)) state.repertorios = [];
     if (!Array.isArray(state.eventos)) state.eventos = [];
+    if (typeof state.notasGerais !== "string") state.notasGerais = "";
+    if (typeof state.notaPropria !== "string") state.notaPropria = "";
+    currentUser = data && data.user ? data.user : null;
     setSyncStatus("ok", "sincronizado");
     return true;
   } catch (e) {
@@ -445,8 +458,47 @@ function addNewEvento() {
   renderMain();
 }
 
+function renderNotasView(main) {
+  main.innerHTML = `
+    <a class="back-link" href="/ensaios/" id="backLink">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Todas as músicas
+    </a>
+    <div class="repertorios-head">
+      <h2>Notas</h2>
+    </div>
+    <div class="notas-block">
+      <label class="field-label">Notas gerais <span class="notas-visibility">— vê toda a gente</span></label>
+      <textarea class="notas-textarea" id="notasGeraisInput" rows="6" placeholder="Notas partilhadas por toda a banda (avisos, ideias, recados de ensaio…)">${escapeHtml(state.notasGerais || "")}</textarea>
+    </div>
+    <div class="notas-block">
+      <label class="field-label">As minhas notas ${currentUser ? `<span class="notas-visibility">— só ${escapeHtml(currentUser)} vê isto</span>` : ""}</label>
+      <textarea class="notas-textarea" id="notaPropriaInput" rows="6" placeholder="Notas privadas, só tu vês (mesmo que outros usem a mesma password).">${escapeHtml(state.notaPropria || "")}</textarea>
+    </div>
+  `;
+  document.getElementById("backLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    view = "home";
+    setPathForSong(null);
+    renderMain();
+  });
+  document.getElementById("notasGeraisInput").addEventListener("input", (e) => {
+    state.notasGerais = e.target.value;
+    scheduleSave();
+  });
+  document.getElementById("notaPropriaInput").addEventListener("input", (e) => {
+    state.notaPropria = e.target.value;
+    scheduleSave();
+  });
+}
+
 function renderMain() {
   const main = document.getElementById("main");
+  if (view === "notas") {
+    renderNotasView(main);
+    return;
+  }
   if (view === "eventos") {
     renderEventosList(main);
     return;
@@ -658,6 +710,10 @@ function applyPath() {
     currentSongId = null;
     currentRepertorioId = null;
     view = "eventos";
+  } else if (isNotasPath()) {
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "notas";
   } else {
     currentSongId = null;
     currentRepertorioId = null;
@@ -705,6 +761,28 @@ async function init() {
     currentRepertorioId = null;
     view = "repertorios";
     setPathForRepertoriosList();
+    renderMain();
+  });
+  document.getElementById("eventosLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const menu = document.getElementById("menuToggle");
+    if (menu) menu.open = false;
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "eventos";
+    setPathForEventosList();
+    renderMain();
+  });
+  document.getElementById("notasLink").addEventListener("click", (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    const menu = document.getElementById("menuToggle");
+    if (menu) menu.open = false;
+    currentSongId = null;
+    currentRepertorioId = null;
+    view = "notas";
+    setPathForNotas();
     renderMain();
   });
   setSyncStatus("ok", "a carregar…");

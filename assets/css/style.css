@@ -315,6 +315,44 @@ body {
   font-size: 12.5px;
   margin: -8px 0 16px;
 }
+.notas-block {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.notas-block .field-label {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.notas-visibility {
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.8;
+}
+.notas-textarea {
+  font-family: 'Work Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 10px 12px;
+  color: var(--text);
+  resize: vertical;
+  min-height: 120px;
+  width: 100%;
+}
+.notas-textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.notas-textarea::placeholder { color: var(--text-dim); opacity: 0.6; }
 .evento-input {
   font-family: 'Work Sans', sans-serif;
   font-size: 14px;
