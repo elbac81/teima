@@ -122,14 +122,24 @@ a.ensaios-link svg,
 a.icon-btn svg { width: 16px; height: 16px; }
 
 .social-row {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 14px;
-  z-index: 50;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: nowrap;
+}
+.social-row .icon-btn {
+  width: 56px;
+  height: 56px;
+}
+.social-row .icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
+@media (max-width: 400px) {
+  .social-row { gap: 12px; }
+  .social-row .icon-btn { width: 48px; height: 48px; }
+  .social-row .icon-btn svg { width: 20px; height: 20px; }
 }
 
 /* ---- Generic inner page layout (socials / música / vídeos / sobre) ---- */
