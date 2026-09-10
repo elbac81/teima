@@ -1,0 +1,21 @@
+name: Diag screenshot
+on: workflow_dispatch
+jobs:
+  shot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install playwright@1.47.0
+      - run: npx playwright install --with-deps chromium
+      - run: node shot.js
+      - name: dump base64
+        run: |
+          echo LETRA_START
+          base64 -w0 letra.png
+          echo LETRA_END
+          echo LIST_START
+          base64 -w0 letras-list.png
+          echo LIST_END
