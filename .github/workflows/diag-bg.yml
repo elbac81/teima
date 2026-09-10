@@ -1,0 +1,79 @@
+name: Diag bg check
+on: workflow_dispatch
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: verify section note isolation and logout
+        run: |
+          python3 - <<'PYEOF'
+          import json, subprocess
+
+          def curl_get(user):
+              out = subprocess.run(
+                  ['curl', '-s', '--max-time', '20', '-u', f'{user}:fareja', 'https://teima.space/ensaios/api.php'],
+                  capture_output=True, text=True
+              )
+              return json.loads(out.stdout)
+
+          def curl_post(user, payload):
+              subprocess.run(
+                  ['curl', '-s', '--max-time', '20', '-u', f'{user}:fareja',
+                   '-H', 'Content-Type: application/json',
+                   '-X', 'POST', '--data-binary', '@-',
+                   'https://teima.space/ensaios/api.php'],
+                  input=json.dumps(payload), capture_output=True, text=True
+              )
+
+          before = curl_get('filipe')
+          songs = before['songs']
+          if not songs or not songs[0].get('sections'):
+              print('NO_SECTIONS_TO_TEST')
+          else:
+              song = songs[0]
+              sec = song['sections'][0]
+              original = sec.get('notaPropria', '')
+              print(f"testing song={song['id']!r} section={sec['id']!r} original notaPropria={original!r}")
+
+              sec['notaPropria'] = 'TESTE_SECCAO_FILIPE'
+              payload = {
+                  'songs': songs,
+                  'repertorios': before.get('repertorios', []),
+                  'eventos': before.get('eventos', []),
+                  'notasGerais': before.get('notasGerais', ''),
+                  'notaPropria': before.get('notaPropria', ''),
+              }
+              curl_post('filipe', payload)
+
+              after_filipe = curl_get('filipe')
+              after_ricardo = curl_get('ricardo')
+              f_sec = next(s for s in after_filipe['songs'] if s['id'] == song['id'])['sections']
+              f_sec = next(s for s in f_sec if s['id'] == sec['id'])
+              r_sec = next(s for s in after_ricardo['songs'] if s['id'] == song['id'])['sections']
+              r_sec = next(s for s in r_sec if s['id'] == sec['id'])
+              print(f"filipe sees notaPropria = {f_sec.get('notaPropria')!r}")
+              print(f"ricardo sees notaPropria = {r_sec.get('notaPropria')!r} (should NOT be the test string)")
+              # also confirm the shared 'notas' and other song fields are untouched
+              print(f"section 'notas' (shared) unchanged = {sec.get('notas')!r}")
+              print(f"song title unchanged = {song.get('title')!r}")
+
+              ok = f_sec.get('notaPropria') == 'TESTE_SECCAO_FILIPE' and r_sec.get('notaPropria') != 'TESTE_SECCAO_FILIPE'
+              print('SECTION_ISOLATION_OK' if ok else 'SECTION_ISOLATION_FAILED')
+
+              # restore
+              sec['notaPropria'] = original
+              payload['songs'] = songs
+              curl_post('filipe', payload)
+              restored = curl_get('filipe')
+              r_sec2 = next(s for s in restored['songs'] if s['id'] == song['id'])['sections']
+              r_sec2 = next(s for s in r_sec2 if s['id'] == sec['id'])
+              print(f"restored notaPropria = {r_sec2.get('notaPropria')!r} (should match original {original!r})")
+
+          # logout endpoint check
+          out = subprocess.run(
+              ['curl', '-s', '-o', '/dev/null', '-w', '%{http_code}', '--max-time', '20',
+               '-u', 'filipe:fareja', 'https://teima.space/ensaios/logout.php'],
+              capture_output=True, text=True
+          )
+          print(f"logout.php status = {out.stdout} (should be 401)")
+          PYEOF
