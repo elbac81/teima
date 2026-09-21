@@ -12,6 +12,20 @@ const TIPO_COLORS = {
   "Instrumental": "#4f6a8a",
   "Outro": "#7a7060",
 };
+
+// Largura de cada chip na tira de estrutura, proporcional aos
+// compassos da secção — dá um diagrama temporal a sério (uma secção
+// com o dobro dos compassos ocupa o dobro do espaço), não só uma
+// fila de etiquetas do mesmo tamanho. Sem compassos definidos, fica
+// com uma largura de referência neutra.
+const CHIP_PX_POR_COMPASSO = 7;
+const CHIP_LARGURA_MIN = 46;
+const CHIP_LARGURA_OMISSAO = 72;
+function chipLargura(sec) {
+  const n = parseInt(sec.compassos, 10);
+  if (!n || n <= 0) return CHIP_LARGURA_OMISSAO;
+  return Math.max(CHIP_LARGURA_MIN, Math.round(n * CHIP_PX_POR_COMPASSO));
+}
 const ESTADOS = {
   composicao: "Em composição / projeto",
   ensaio: "Em ensaio",
@@ -38,6 +52,19 @@ function escapeHtml(s) {
   return (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// Cresce a caixa à medida do conteúdo, em vez de deixar barra de
+// scroll lá dentro — o "resize: none" no CSS conta com isto (sem
+// isto, ficava sem forma nenhuma de crescer).
+function autoGrow(el) {
+  el.style.height = "auto";
+  // box-sizing: border-box (ver style.css) faz a altura incluir a
+  // borda — sem a somar aqui, ficava sempre 1-2px curta do conteúdo
+  // real, e era esse resto que forçava um scroll interno mínimo.
+  const cs = getComputedStyle(el);
+  const borda = parseFloat(cs.borderTopWidth || "0") + parseFloat(cs.borderBottomWidth || "0");
+  el.style.height = el.scrollHeight + borda + "px";
+}
+
 const CHORD_TOKEN_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus[24]?|add)?[0-9]?(\/[A-G](#|b)?)?$/;
 
 function isChordLine(line) {
@@ -45,85 +72,6 @@ function isChordLine(line) {
   if (!trimmed) return false;
   const tokens = trimmed.split(/\s+/);
   return tokens.every((t) => CHORD_TOKEN_RE.test(t));
-}
-
-// Acordes já usados algures na música, dos mais para os menos
-// frequentes — servem de sugestões rápidas ao inserir um acorde novo
-// (a maioria das músicas repete o mesmo punhado de acordes).
-function songChordVocabulary(song) {
-  const counts = new Map();
-  (song.sections || []).forEach((sec) => {
-    (sec.cifra || "").split("\n").forEach((line) => {
-      if (!isChordLine(line)) return;
-      line.trim().split(/\s+/).forEach((tok) => counts.set(tok, (counts.get(tok) || 0) + 1));
-    });
-  });
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([tok]) => tok).slice(0, 12);
-}
-
-// Insere um acorde na cifra à coluna exacta onde está o cursor, em vez
-// de obrigar a contar espaços à mão: se o cursor já está numa linha de
-// acordes (ou vazia), o acorde entra ali; senão cria (ou reaproveita) a
-// linha de acordes imediatamente acima da linha de letra onde o cursor
-// estava, preenchida com espaços até à coluna certa.
-function insertChordAtCursor(textarea, chord) {
-  chord = (chord || "").trim();
-  if (!chord) return;
-
-  const value = textarea.value;
-  const pos = textarea.selectionStart ?? value.length;
-  const lines = value.split("\n");
-
-  let idx = 0;
-  let acc = 0;
-  for (idx = 0; idx < lines.length; idx++) {
-    const lineLen = lines[idx].length;
-    if (acc + lineLen >= pos) break;
-    acc += lineLen + 1;
-  }
-  if (idx >= lines.length) idx = lines.length - 1;
-  const col = Math.max(0, pos - acc);
-
-  const cursorLineUsavel = isChordLine(lines[idx]) || lines[idx].trim() === "";
-  let chordLineIdx;
-  let linhaNovaAcima = false;
-  if (cursorLineUsavel) {
-    chordLineIdx = idx;
-  } else if (idx > 0 && isChordLine(lines[idx - 1])) {
-    chordLineIdx = idx - 1;
-  } else {
-    lines.splice(idx, 0, "");
-    chordLineIdx = idx;
-    linhaNovaAcima = true;
-  }
-
-  let linha = lines[chordLineIdx];
-  if (linha.length < col) linha = linha + " ".repeat(col - linha.length);
-  const antes = linha.slice(0, col);
-  const depois = linha.slice(col);
-  // Espaço de segurança para não colar o acorde novo a texto já ali —
-  // sem isto, um acorde inserido perto de outro ficava ilegível.
-  const folgaAntes = antes.length && !/\s$/.test(antes) ? " " : "";
-  const folgaDepois = depois.length && !/^\s/.test(depois) ? " " : "";
-  const inserido = folgaAntes + chord + folgaDepois;
-  lines[chordLineIdx] = antes + inserido + depois;
-
-  textarea.value = lines.join("\n");
-  textarea.dispatchEvent(new Event("input", { bubbles: true }));
-  textarea.focus();
-
-  let novaLinha, novaCol;
-  if (chordLineIdx === idx) {
-    novaLinha = chordLineIdx;
-    novaCol = col + inserido.length;
-  } else {
-    novaLinha = linhaNovaAcima ? idx + 1 : idx;
-    novaCol = col;
-  }
-  let novaPos = 0;
-  for (let i = 0; i < novaLinha; i++) novaPos += lines[i].length + 1;
-  novaPos += novaCol;
-  textarea.setSelectionRange(novaPos, novaPos);
 }
 
 // Marca cada linha de uma cifra como acorde ou letra, para as poder
@@ -868,9 +816,12 @@ function renderMain() {
       sections.length > 1
         ? `<div class="structure-overview" id="structureOverview">
       ${sections
-        .map(
-          (sec, i) => `${i > 0 ? '<span class="structure-arrow">→</span>' : ""}<button type="button" class="structure-chip" data-id="${sec.id}" style="--tipo-color:${TIPO_COLORS[sec.tipo] || ""}">${escapeHtml(sec.tipo)}</button>`
-        )
+        .map((sec, i) => {
+          const n = parseInt(sec.compassos, 10);
+          const rotulo = escapeHtml(sec.tipo) + (n > 0 ? ` · ${n}` : "");
+          const titulo = escapeHtml(sec.tipo) + (n > 0 ? ` — ${n} compassos` : "");
+          return `${i > 0 ? '<span class="structure-arrow">→</span>' : ""}<button type="button" class="structure-chip" data-id="${sec.id}" title="${titulo}" style="--tipo-color:${TIPO_COLORS[sec.tipo] || ""}; width:${chipLargura(sec)}px">${rotulo}</button>`;
+        })
         .join("")}
     </div>`
         : ""
@@ -881,7 +832,6 @@ function renderMain() {
           ? '<div class="no-sections">Ainda sem secções. Adiciona a primeira (intro, verso…).</div>'
           : sections
               .map((sec) => {
-                const chips = songChordVocabulary(song);
                 return `
         <div class="section-card" data-id="${sec.id}" style="--tipo-color:${TIPO_COLORS[sec.tipo] || ""}">
           <div class="spine-col">
@@ -895,6 +845,7 @@ function renderMain() {
                 ${TIPOS.map((t) => `<option value="${t}" ${t === sec.tipo ? "selected" : ""}>${t}</option>`).join("")}
               </select>
               <input class="tom-field" data-field="tom" placeholder="tom" value="${escapeHtml(sec.tom || "")}" />
+              <input class="compassos-field" data-field="compassos" placeholder="compassos" inputmode="numeric" title="Duração em compassos — aparece na tira de estrutura acima" value="${escapeHtml(sec.compassos || "")}" />
               <div class="section-actions">
                 <button class="mini-btn dup" title="Duplicar secção">⧉</button>
                 <button class="mini-btn up" title="Mover para cima">↑</button>
@@ -903,16 +854,9 @@ function renderMain() {
               </div>
             </div>
             <div class="section-fields">
-              <div class="chord-tools">
-                <button type="button" class="chord-insert-btn" title="Inserir um acorde na posição do cursor, na cifra">♪ Acorde na posição do cursor</button>
-                <div class="chord-popover" hidden>
-                  <input type="text" class="chord-input" placeholder="ex. Am7" autocomplete="off" />
-                  ${chips.length ? `<div class="chord-chips">${chips.map((c) => `<button type="button" class="chord-chip">${escapeHtml(c)}</button>`).join("")}</div>` : ""}
-                </div>
-              </div>
-              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra, ou usa o botão ♪ acima">${escapeHtml(sec.cifra || "")}</textarea>
+              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
               <label class="field-label">Notas gerais</label>
-              <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+              <textarea class="notas notas--gerais" data-field="notas" rows="8" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
               <label class="field-label">Notas para mim</label>
               <textarea class="notas" data-field="notaPropria" rows="1" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
             </div>
@@ -969,65 +913,54 @@ function renderMain() {
     card.querySelector('[data-field="tipo"]').addEventListener("change", (e) => {
       sec.tipo = e.target.value;
       e.target.closest(".section-card").style.setProperty("--tipo-color", TIPO_COLORS[e.target.value] || "");
+      const chip = document.querySelector(`.structure-chip[data-id="${secId}"]`);
+      if (chip) {
+        const n = parseInt(sec.compassos, 10);
+        chip.style.setProperty("--tipo-color", TIPO_COLORS[sec.tipo] || "");
+        chip.textContent = sec.tipo + (n > 0 ? ` · ${n}` : "");
+        chip.title = sec.tipo + (n > 0 ? ` — ${n} compassos` : "");
+      }
       scheduleSave();
     });
     card.querySelector('[data-field="tom"]').addEventListener("input", (e) => {
       sec.tom = e.target.value;
       scheduleSave();
     });
+    card.querySelector('[data-field="compassos"]').addEventListener("input", (e) => {
+      sec.compassos = e.target.value;
+      const chip = document.querySelector(`.structure-chip[data-id="${secId}"]`);
+      if (chip) {
+        const n = parseInt(sec.compassos, 10);
+        chip.style.width = chipLargura(sec) + "px";
+        chip.textContent = sec.tipo + (n > 0 ? ` · ${n}` : "");
+        chip.title = sec.tipo + (n > 0 ? ` — ${n} compassos` : "");
+      }
+      scheduleSave();
+    });
     const cifraEl = card.querySelector('[data-field="cifra"]');
+    const notasEl = card.querySelector('[data-field="notas"]');
+    const notaPropriaEl = card.querySelector('[data-field="notaPropria"]');
+    [cifraEl, notasEl, notaPropriaEl].forEach(autoGrow);
+
     cifraEl.addEventListener("input", (e) => {
       sec.cifra = e.target.value;
+      autoGrow(e.target);
       scheduleSave();
     });
-    card.querySelector('[data-field="notas"]').addEventListener("input", (e) => {
+    notasEl.addEventListener("input", (e) => {
       sec.notas = e.target.value;
+      autoGrow(e.target);
       scheduleSave();
     });
-    card.querySelector('[data-field="notaPropria"]').addEventListener("input", (e) => {
+    notaPropriaEl.addEventListener("input", (e) => {
       sec.notaPropria = e.target.value;
+      autoGrow(e.target);
       scheduleSave();
     });
     card.querySelector(".up").addEventListener("click", () => moveSection(song, i, -1, sections));
     card.querySelector(".down").addEventListener("click", () => moveSection(song, i, 1, sections));
     card.querySelector(".dup").addEventListener("click", () => duplicateSection(song, secId));
     card.querySelector(".del").addEventListener("click", () => deleteSection(song, secId));
-
-    // Inserir acorde: o botão abre uma caixinha com um campo de texto e
-    // sugestões (acordes já usados na música); tanto o Enter no campo
-    // como um clique numa sugestão inserem à posição onde o cursor
-    // estava na cifra antes de se abrir a caixinha.
-    const chordBtn = card.querySelector(".chord-insert-btn");
-    const popover = card.querySelector(".chord-popover");
-    const chordInput = card.querySelector(".chord-input");
-    chordBtn.addEventListener("click", () => {
-      const estavaAberto = !popover.hidden;
-      document.querySelectorAll(".chord-popover").forEach((p) => (p.hidden = true));
-      if (estavaAberto) return;
-      popover.hidden = false;
-      chordInput.value = "";
-      chordInput.focus();
-    });
-    chordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        insertChordAtCursor(cifraEl, chordInput.value);
-        sec.cifra = cifraEl.value;
-        scheduleSave();
-        popover.hidden = true;
-      } else if (e.key === "Escape") {
-        popover.hidden = true;
-        cifraEl.focus();
-      }
-    });
-    card.querySelectorAll(".chord-chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        insertChordAtCursor(cifraEl, chip.textContent);
-        sec.cifra = cifraEl.value;
-        scheduleSave();
-        popover.hidden = true;
-      });
-    });
 
     // Reordenar por ponteiro (rato ou toque) — o arrasto nativo do HTML
     // não funciona em ecrãs tácteis, e era assim que isto era feito
@@ -1091,7 +1024,7 @@ function addSection(song) {
   const orders = (song.sections || []).map((s) => s.order || 0);
   const nextOrder = orders.length ? Math.max(...orders) + 1 : 0;
   song.sections = song.sections || [];
-  song.sections.push({ id: uid(), tipo: "Verso", tom: "", cifra: "", notas: "", order: nextOrder });
+  song.sections.push({ id: uid(), tipo: "Verso", tom: "", compassos: "", cifra: "", notas: "", order: nextOrder });
   saveState();
   renderMain();
 }
@@ -1208,14 +1141,6 @@ function hidePrintText() {
 }
 
 async function init() {
-  // Uma só vez para a vida da página (não por render) — fecha qualquer
-  // popover de "inserir acorde" aberto ao clicar fora dele.
-  document.addEventListener("click", (e) => {
-    document.querySelectorAll(".chord-popover:not([hidden])").forEach((pop) => {
-      if (!pop.closest(".chord-tools")?.contains(e.target)) pop.hidden = true;
-    });
-  });
-
   document.getElementById("newSongBtn").addEventListener("click", () => {
     const menu = document.getElementById("menuToggle");
     if (menu) menu.open = false;
