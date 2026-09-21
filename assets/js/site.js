@@ -1,4 +1,17 @@
 const TIPOS = ["Intro", "Verso", "Pré-Refrão", "Refrão", "Break", "Solo", "Ponte", "Instrumental", "Outro"];
+// Uma cor por tipo de secção, para dar de relance a forma da música
+// (onde estão os refrãos, quantos versos há…) sem ler cada rótulo.
+const TIPO_COLORS = {
+  "Intro": "#2f6470",
+  "Verso": "#8a6a4f",
+  "Pré-Refrão": "#c08a2e",
+  "Refrão": "#a1402f",
+  "Break": "#6b4c7a",
+  "Solo": "#c1652e",
+  "Ponte": "#5c7a52",
+  "Instrumental": "#4f6a8a",
+  "Outro": "#7a7060",
+};
 const ESTADOS = {
   composicao: "Em composição / projeto",
   ensaio: "Em ensaio",
@@ -16,7 +29,6 @@ let view = "home";
 let saveTimer = null;
 let pollTimer = null;
 let dirty = false;
-let dragSectionId = null;
 
 function uid() {
   return "id_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -33,6 +45,85 @@ function isChordLine(line) {
   if (!trimmed) return false;
   const tokens = trimmed.split(/\s+/);
   return tokens.every((t) => CHORD_TOKEN_RE.test(t));
+}
+
+// Acordes já usados algures na música, dos mais para os menos
+// frequentes — servem de sugestões rápidas ao inserir um acorde novo
+// (a maioria das músicas repete o mesmo punhado de acordes).
+function songChordVocabulary(song) {
+  const counts = new Map();
+  (song.sections || []).forEach((sec) => {
+    (sec.cifra || "").split("\n").forEach((line) => {
+      if (!isChordLine(line)) return;
+      line.trim().split(/\s+/).forEach((tok) => counts.set(tok, (counts.get(tok) || 0) + 1));
+    });
+  });
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([tok]) => tok).slice(0, 12);
+}
+
+// Insere um acorde na cifra à coluna exacta onde está o cursor, em vez
+// de obrigar a contar espaços à mão: se o cursor já está numa linha de
+// acordes (ou vazia), o acorde entra ali; senão cria (ou reaproveita) a
+// linha de acordes imediatamente acima da linha de letra onde o cursor
+// estava, preenchida com espaços até à coluna certa.
+function insertChordAtCursor(textarea, chord) {
+  chord = (chord || "").trim();
+  if (!chord) return;
+
+  const value = textarea.value;
+  const pos = textarea.selectionStart ?? value.length;
+  const lines = value.split("\n");
+
+  let idx = 0;
+  let acc = 0;
+  for (idx = 0; idx < lines.length; idx++) {
+    const lineLen = lines[idx].length;
+    if (acc + lineLen >= pos) break;
+    acc += lineLen + 1;
+  }
+  if (idx >= lines.length) idx = lines.length - 1;
+  const col = Math.max(0, pos - acc);
+
+  const cursorLineUsavel = isChordLine(lines[idx]) || lines[idx].trim() === "";
+  let chordLineIdx;
+  let linhaNovaAcima = false;
+  if (cursorLineUsavel) {
+    chordLineIdx = idx;
+  } else if (idx > 0 && isChordLine(lines[idx - 1])) {
+    chordLineIdx = idx - 1;
+  } else {
+    lines.splice(idx, 0, "");
+    chordLineIdx = idx;
+    linhaNovaAcima = true;
+  }
+
+  let linha = lines[chordLineIdx];
+  if (linha.length < col) linha = linha + " ".repeat(col - linha.length);
+  const antes = linha.slice(0, col);
+  const depois = linha.slice(col);
+  // Espaço de segurança para não colar o acorde novo a texto já ali —
+  // sem isto, um acorde inserido perto de outro ficava ilegível.
+  const folgaAntes = antes.length && !/\s$/.test(antes) ? " " : "";
+  const folgaDepois = depois.length && !/^\s/.test(depois) ? " " : "";
+  const inserido = folgaAntes + chord + folgaDepois;
+  lines[chordLineIdx] = antes + inserido + depois;
+
+  textarea.value = lines.join("\n");
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
+  textarea.focus();
+
+  let novaLinha, novaCol;
+  if (chordLineIdx === idx) {
+    novaLinha = chordLineIdx;
+    novaCol = col + inserido.length;
+  } else {
+    novaLinha = linhaNovaAcima ? idx + 1 : idx;
+    novaCol = col;
+  }
+  let novaPos = 0;
+  for (let i = 0; i < novaLinha; i++) novaPos += lines[i].length + 1;
+  novaPos += novaCol;
+  textarea.setSelectionRange(novaPos, novaPos);
 }
 
 // Marca cada linha de uma cifra como acorde ou letra, para as poder
@@ -773,14 +864,26 @@ function renderMain() {
         </div>
       </div>
     </div>
+    ${
+      sections.length > 1
+        ? `<div class="structure-overview" id="structureOverview">
+      ${sections
+        .map(
+          (sec, i) => `${i > 0 ? '<span class="structure-arrow">→</span>' : ""}<button type="button" class="structure-chip" data-id="${sec.id}" style="--tipo-color:${TIPO_COLORS[sec.tipo] || ""}">${escapeHtml(sec.tipo)}</button>`
+        )
+        .join("")}
+    </div>`
+        : ""
+    }
     <div class="structure" id="structure">
       ${
         sections.length === 0
           ? '<div class="no-sections">Ainda sem secções. Adiciona a primeira (intro, verso…).</div>'
           : sections
               .map((sec) => {
+                const chips = songChordVocabulary(song);
                 return `
-        <div class="section-card" data-id="${sec.id}" draggable="true">
+        <div class="section-card" data-id="${sec.id}" style="--tipo-color:${TIPO_COLORS[sec.tipo] || ""}">
           <div class="spine-col">
             <div class="spine-dot"></div>
             <div class="spine-line"></div>
@@ -788,22 +891,30 @@ function renderMain() {
           <div class="section-body">
             <div class="section-top">
               <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
-              <select class="type-select" data-field="tipo" draggable="false">
+              <select class="type-select" data-field="tipo">
                 ${TIPOS.map((t) => `<option value="${t}" ${t === sec.tipo ? "selected" : ""}>${t}</option>`).join("")}
               </select>
-              <input class="tom-field" data-field="tom" placeholder="tom" draggable="false" value="${escapeHtml(sec.tom || "")}" />
+              <input class="tom-field" data-field="tom" placeholder="tom" value="${escapeHtml(sec.tom || "")}" />
               <div class="section-actions">
+                <button class="mini-btn dup" title="Duplicar secção">⧉</button>
                 <button class="mini-btn up" title="Mover para cima">↑</button>
                 <button class="mini-btn down" title="Mover para baixo">↓</button>
                 <button class="mini-btn del" title="Eliminar secção">✕</button>
               </div>
             </div>
             <div class="section-fields">
-              <textarea class="cifra" data-field="cifra" rows="8" draggable="false" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra">${escapeHtml(sec.cifra || "")}</textarea>
+              <div class="chord-tools">
+                <button type="button" class="chord-insert-btn" title="Inserir um acorde na posição do cursor, na cifra">♪ Acorde na posição do cursor</button>
+                <div class="chord-popover" hidden>
+                  <input type="text" class="chord-input" placeholder="ex. Am7" autocomplete="off" />
+                  ${chips.length ? `<div class="chord-chips">${chips.map((c) => `<button type="button" class="chord-chip">${escapeHtml(c)}</button>`).join("")}</div>` : ""}
+                </div>
+              </div>
+              <textarea class="cifra" data-field="cifra" rows="8" placeholder="        G          D&#10;Escreve os acordes acima da letra&#10;        Em         C&#10;linha a linha, acorde sobre a palavra, ou usa o botão ♪ acima">${escapeHtml(sec.cifra || "")}</textarea>
               <label class="field-label">Notas gerais</label>
-              <textarea class="notas" data-field="notas" rows="1" draggable="false" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
+              <textarea class="notas" data-field="notas" rows="1" placeholder="Notas de ensaio (dinâmica, quem canta, dica de execução…)">${escapeHtml(sec.notas || "")}</textarea>
               <label class="field-label">Notas para mim</label>
-              <textarea class="notas" data-field="notaPropria" rows="1" draggable="false" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
+              <textarea class="notas" data-field="notaPropria" rows="1" placeholder="Notas privadas só tuas para esta secção.">${escapeHtml(sec.notaPropria || "")}</textarea>
             </div>
           </div>
         </div>`;
@@ -842,18 +953,30 @@ function renderMain() {
   });
   document.getElementById("addSectionBtn").addEventListener("click", () => addSection(song));
 
+  document.querySelectorAll(".structure-chip").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const target = document.querySelector(`.section-card[data-id="${chip.dataset.id}"]`);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("flash");
+      setTimeout(() => target.classList.remove("flash"), 900);
+    });
+  });
+
   document.querySelectorAll("#structure .section-card").forEach((card, i, all) => {
     const secId = card.dataset.id;
     const sec = sections.find((s) => s.id === secId);
     card.querySelector('[data-field="tipo"]').addEventListener("change", (e) => {
       sec.tipo = e.target.value;
+      e.target.closest(".section-card").style.setProperty("--tipo-color", TIPO_COLORS[e.target.value] || "");
       scheduleSave();
     });
     card.querySelector('[data-field="tom"]').addEventListener("input", (e) => {
       sec.tom = e.target.value;
       scheduleSave();
     });
-    card.querySelector('[data-field="cifra"]').addEventListener("input", (e) => {
+    const cifraEl = card.querySelector('[data-field="cifra"]');
+    cifraEl.addEventListener("input", (e) => {
       sec.cifra = e.target.value;
       scheduleSave();
     });
@@ -867,40 +990,87 @@ function renderMain() {
     });
     card.querySelector(".up").addEventListener("click", () => moveSection(song, i, -1, sections));
     card.querySelector(".down").addEventListener("click", () => moveSection(song, i, 1, sections));
+    card.querySelector(".dup").addEventListener("click", () => duplicateSection(song, secId));
     card.querySelector(".del").addEventListener("click", () => deleteSection(song, secId));
 
-    card.addEventListener("dragstart", () => {
-      dragSectionId = secId;
-      card.classList.add("dragging");
+    // Inserir acorde: o botão abre uma caixinha com um campo de texto e
+    // sugestões (acordes já usados na música); tanto o Enter no campo
+    // como um clique numa sugestão inserem à posição onde o cursor
+    // estava na cifra antes de se abrir a caixinha.
+    const chordBtn = card.querySelector(".chord-insert-btn");
+    const popover = card.querySelector(".chord-popover");
+    const chordInput = card.querySelector(".chord-input");
+    chordBtn.addEventListener("click", () => {
+      const estavaAberto = !popover.hidden;
+      document.querySelectorAll(".chord-popover").forEach((p) => (p.hidden = true));
+      if (estavaAberto) return;
+      popover.hidden = false;
+      chordInput.value = "";
+      chordInput.focus();
     });
-    card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
-      document.querySelectorAll("#structure .section-card.drag-over").forEach((el) => el.classList.remove("drag-over"));
-      dragSectionId = null;
+    chordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        insertChordAtCursor(cifraEl, chordInput.value);
+        sec.cifra = cifraEl.value;
+        scheduleSave();
+        popover.hidden = true;
+      } else if (e.key === "Escape") {
+        popover.hidden = true;
+        cifraEl.focus();
+      }
     });
-    card.addEventListener("dragover", (e) => {
-      if (!dragSectionId || dragSectionId === secId) return;
-      e.preventDefault();
-      card.classList.add("drag-over");
-    });
-    card.addEventListener("dragleave", () => {
-      card.classList.remove("drag-over");
-    });
-    card.addEventListener("drop", (e) => {
-      e.preventDefault();
-      card.classList.remove("drag-over");
-      const draggedId = dragSectionId;
-      if (!draggedId || draggedId === secId) return;
-      const fromIndex = sections.findIndex((s) => s.id === draggedId);
-      const toIndex = sections.findIndex((s) => s.id === secId);
-      if (fromIndex === -1 || toIndex === -1) return;
-      const [moved] = sections.splice(fromIndex, 1);
-      sections.splice(toIndex, 0, moved);
-      sections.forEach((s, idx) => {
-        s.order = idx;
+    card.querySelectorAll(".chord-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        insertChordAtCursor(cifraEl, chip.textContent);
+        sec.cifra = cifraEl.value;
+        scheduleSave();
+        popover.hidden = true;
       });
-      saveState();
-      renderMain();
+    });
+
+    // Reordenar por ponteiro (rato ou toque) — o arrasto nativo do HTML
+    // não funciona em ecrãs tácteis, e era assim que isto era feito
+    // antes. A secção mais próxima do ponteiro, a cada instante, é o
+    // alvo — funciona tanto na grelha (ecrã largo) como na coluna
+    // única (telemóvel).
+    const handle = card.querySelector(".drag-handle");
+    handle.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
+      card.classList.add("dragging");
+      handle.setPointerCapture(e.pointerId);
+      let alvo = null;
+
+      const aoMover = (ev) => {
+        const outras = [...document.querySelectorAll("#structure .section-card")].filter((c) => c !== card);
+        let maisPerto = null;
+        let menorDist = Infinity;
+        outras.forEach((c) => {
+          const r = c.getBoundingClientRect();
+          const dist = Math.hypot(ev.clientX - (r.left + r.width / 2), ev.clientY - (r.top + r.height / 2));
+          if (dist < menorDist) {
+            menorDist = dist;
+            maisPerto = c;
+          }
+        });
+        if (alvo && alvo !== maisPerto) alvo.classList.remove("drag-over");
+        alvo = maisPerto;
+        if (alvo) alvo.classList.add("drag-over");
+      };
+      const aoLargar = () => {
+        handle.removeEventListener("pointermove", aoMover);
+        handle.removeEventListener("pointerup", aoLargar);
+        handle.removeEventListener("pointercancel", aoLargar);
+        card.classList.remove("dragging");
+        if (alvo) {
+          alvo.classList.remove("drag-over");
+          reorderSection(song, secId, alvo.dataset.id, sections);
+        }
+      };
+      handle.addEventListener("pointermove", aoMover);
+      handle.addEventListener("pointerup", aoLargar);
+      handle.addEventListener("pointercancel", aoLargar);
     });
   });
 }
@@ -928,6 +1098,39 @@ function addSection(song) {
 
 function deleteSection(song, id) {
   song.sections = (song.sections || []).filter((s) => s.id !== id);
+  saveState();
+  renderMain();
+}
+
+// Clona a secção (tipo, tom, cifra, notas) logo a seguir à original —
+// poupa reescrever um Verso ou Refrão que se repete igual.
+function duplicateSection(song, id) {
+  const list = song.sections || [];
+  const i = list.findIndex((s) => s.id === id);
+  if (i === -1) return;
+  const src = list[i];
+  const copia = { ...src, id: uid() };
+  list.splice(i + 1, 0, copia);
+  list.forEach((s, idx) => {
+    s.order = idx;
+  });
+  saveState();
+  renderMain();
+}
+
+// Move a secção arrastada para o lugar da secção alvo — mesma lógica
+// que o "drop" do arrasto nativo tinha, agora partilhada com o
+// arrasto por ponteiro (funciona também em ecrãs tácteis).
+function reorderSection(song, draggedId, targetId, sections) {
+  if (!draggedId || !targetId || draggedId === targetId) return;
+  const fromIndex = sections.findIndex((s) => s.id === draggedId);
+  const toIndex = sections.findIndex((s) => s.id === targetId);
+  if (fromIndex === -1 || toIndex === -1) return;
+  const [moved] = sections.splice(fromIndex, 1);
+  sections.splice(toIndex, 0, moved);
+  sections.forEach((s, idx) => {
+    s.order = idx;
+  });
   saveState();
   renderMain();
 }
@@ -1005,6 +1208,14 @@ function hidePrintText() {
 }
 
 async function init() {
+  // Uma só vez para a vida da página (não por render) — fecha qualquer
+  // popover de "inserir acorde" aberto ao clicar fora dele.
+  document.addEventListener("click", (e) => {
+    document.querySelectorAll(".chord-popover:not([hidden])").forEach((pop) => {
+      if (!pop.closest(".chord-tools")?.contains(e.target)) pop.hidden = true;
+    });
+  });
+
   document.getElementById("newSongBtn").addEventListener("click", () => {
     const menu = document.getElementById("menuToggle");
     if (menu) menu.open = false;
