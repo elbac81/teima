@@ -1,0 +1,3 @@
+# Dados das Estruturas / guias: vivem só no servidor
+dados/estruturas*.json
+dados/estruturas.json.*
